@@ -1,0 +1,158 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    color: #444;
+}
+
+a {
+  color: #1A69D3;
+  text-decoration: none;
+}
+a:hover {
+  color: #5D91D8;
+}
+a:active {
+  color: #5D91D8;
+}
+.header {
+    color: #444;
+}
+.row {
+      display: flex;
+}
+
+#bibtex {
+    height: 12em
+}
+
+#paper-title h3 small {
+    color: #777;
+    font-size: 0.7em
+}
+
+.container>.row>img.img-responsive,
+.container>.row>div>img.img-responsive {
+    padding: 1em 0
+}
+
+.row img.img-responsive {
+    width: 100%;
+}
+
+#authors .list-inline-item {
+    padding: 0.5em
+}
+
+.gif-label {
+    margin: 0.3em 0;
+    font-size: 0.7em;
+}
+
+.gif-label>div {
+    text-align: center;
+    padding: 0
+}
+
+#dynamic-teaser .gif-label {
+    margin: 0 -15px;
+}
+
+body>.container>.row>div {
+    padding: 0 2em
+}
+
+body>.container>.row>div.grey-container {
+    background: #f2f2f2;
+    padding: 1.5em 2em
+}
+
+#file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 3fr))
+}
+
+#file-grid .video-thumbnail {
+    padding: 1em;
+}
+
+#file-grid .video-thumbnail video {
+    max-width: 100%;
+}
+
+.row.eleven-col {
+    width: 109.0909090909%;
+    overflow: hidden
+}
+
+.row.ten-col {
+    width: 120%;
+    overflow: hidden
+}
+
+.row.eight-col {
+    width: 150%;
+    overflow: hidden
+}
+
+.io-arrow {
+    position: relative;
+    display: block;
+    text-align: center;
+}
+
+.io-arrow>svg {
+    position: absolute;
+    color: #555;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%)
+}
+
+#demo-warning {
+    display: none;
+    color: red;
+}
+
+
+.demo-card {
+    width: 100%;
+    height: 250px;
+    margin-bottom: 1em;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.demo-card h5 a {
+    text-decoration: none;
+    color: #000
+}
+
+.demo-card>img {
+    width: 100%;
+    height: 160px;
+    object-fit: contain;
+    padding: 1em;
+}
+
+.demo-card .card-body {
+    padding: 1em 1.5em;
+    background: #fafafa;
+}
+
+@media only screen and (max-width: 992px) {
+    #teaser-one .row>div>.row {
+        padding: 0 45px
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    #teaser-one .row>div>.row {
+        padding: 0 65px
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    #teaser-one .row>div>.row {
+        padding: 0 25px
+    }
+}
+

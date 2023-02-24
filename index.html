@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="SLAHMR Project Page">
+  <meta name="author" content="Vickie Ye">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta property="og:image" content="teaser.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:creator" content="@vickie_ye_">
+
+  <title>
+      Decoupling Human and Camera Motion from Videos in the Wild
+  </title>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+
+<h1 align="center"></h1><br>
+<div class="container">
+	<div class="row mb-2 mt-4" id="paper-title">
+		<h1 class="col-md-12 text-center">
+            Decoupling Human and Camera Motion from Videos in the Wild
+		</h1>
+	</div>
+    <div class="row" id="authors">
+        <div class="mx-auto text-center">
+            <ul class="list-inline mb-0">
+                <li class="list-inline-item">
+                    <a href="https://people.eecs.berkeley.edu/~vye">Vickie Ye</a>
+                </li>
+
+                <li class="list-inline-item">
+                    <a href="https://geopavlakos.github.io/">Georgios Pavlakos</a>
+                </li>
+
+                <li class="list-inline-item">
+                    <a href="https://people.eecs.berkeley.edu/~kanazawa/">Angjoo Kanazawa</a>
+                </li>
+
+                <li class="list-inline-item">
+                    <a href="https://people.eecs.berkeley.edu/~malik/">Jitendra Malik</a>
+                </li>
+            </ul>
+            <ul class="list-inline mb-0" id="institution">
+                <li class="list-inline-item">
+                    UC Berkeley
+                </li>
+            </ul>
+        </div>
+    </div>
+
+	<div class="row mb-2" id="links">
+		<div class="mx-auto">
+			<ul class="nav">
+				<li class="nav-item text-center">
+					<a href="https://arxiv.org/abs/2204.07151" class="nav-link" title="Link to Arxiv">
+						<svg style="width:48px;height:48px" viewBox="0 0 24 24">
+							<path fill="currentColor" d="M16 0H8C6.9 0 6 .9 6 2V18C6 19.1 6.9 20 8 20H20C21.1 20 22 19.1 22 18V6L16 0M20 18H8V2H15V7H20V18M4 4V22H20V24H4C2.9 24 2 23.1 2 22V4H4M10 10V12H18V10H10M10 14V16H15V14H10Z" />
+						</svg><br>
+						Paper
+					</a>
+				<li class="nav-item text-center">
+					<a href="https://github.com/vye16/slahmr" class="nav-link">
+						<svg style="width:48px;height:48px" viewBox="0 0 24 24">
+							<path fill="currentColor" d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L6.04,7.5L12,10.85L17.96,7.5L12,4.15M5,15.91L11,19.29V12.58L5,9.21V15.91M19,15.91V9.21L13,12.58V19.29L19,15.91Z" />
+						</svg>
+						<br>
+						Code
+					</a>
+                </ul>
+            </div>
+        </div>
+
+    <div class="row mb-3 pt-2">
+        <div class="col-md-10 mx-auto">
+			<video autoplay loop muted playsinline width="100%">
+			  <source src="media/teaser_vid.mp4" type="video/mp4">
+			</video>
+			<p class="text-justify" style="font-size:90%">
+            Given a video of moving people (left), we present <b>SLAHMR</b>: Simultaneous Localication and Human Mesh Recovery,
+            a method to recover the global trajectories of the people and cameras in the world coordinate frame (right bottom).
+            Prior methods model human motion in the camera coordinate frame (right top),
+            and cannot recover the global displacement of the athlete.
+			</p>
+        </div>
+    </div>        
+    <div class="row mb-3 pt-2">
+        <div class="col-md-10 mx-auto">
+            <h4>Abstract</h4>
+            We propose a method to reconstruct global human trajectories from videos in the wild.
+            Our optimization method decouples the camera and human motion, which allows us to place people in the same world coordinate frame.
+            Most existing methods do not model the camera motion;
+            methods that rely on the background pixels to infer 3D human
+            motion usually require a full scene reconstruction, which
+            is often not possible for in-the-wild videos.
+            However, even when existing SLAM systems cannot recover accurate scene
+            reconstructions, the background pixel motion still provides
+            enough signal to constrain the camera motion.
+            We show that relative camera estimates along with data-driven human motion priors can resolve the scene scale ambiguity and recover global human trajectories.
+            Our method robustly recovers the global 3D trajectories of people in challenging in-the-wild videos, such as PoseTrack.
+            We quantify our improvement over existing methods on 3D human dataset Egobody.
+            We further demonstrate that our recovered camera scale allows us to reason about motion of multiple people in a shared coordinate frame, which improves performance of downstream tracking in PoseTrack.
+            <p class="text-justify">
+            </p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-10 mx-auto">
+            <h4 class="mb-3">BibTeX</h4>
+            <textarea id="bibtex" class="form-control" readonly>@inproceedings{ye2023slahmr,
+	title = {Decoupling Human and Camera Motion from Videos in the Wild},
+	author = {Ye, Vickie and Pavlakos, Georgios and Malik, Jitendra and Kanazawa, Angjoo},
+	booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+	month = {June},
+	year = {2023}
+}</textarea>
+        </div>
+    </div>
+
+</div>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-H2KJW23TXF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-H2KJW23TXF');
+</script>
+
