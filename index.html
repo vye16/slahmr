@@ -15,15 +15,17 @@
   <!-- Bootstrap core CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" crossorigin="anonymous">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.3/dist/css/bulma-carousel.min.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.gstatic.com">
 
 <h1 align="center"></h1><br>
 <div class="container">
 	<div class="row mb-2 mt-4" id="paper-title">
-		<h1 class="col-md-12 text-center">
+		<h2 class="col-md-12 text-center">
             Decoupling Human and Camera Motion from Videos in the Wild
-		</h1>
+		</h2>
 	</div>
     <div class="row" id="authors">
         <div class="mx-auto text-center">
@@ -108,6 +110,68 @@
         </div>
     </div>
 
+    <div class="row mb-3 pt-2">
+        <div class="col-md-10 mx-auto">
+                <div id="results-carousel" class="carousel">
+                    <div class="item">
+                        <video autoplay loop muted playsinline
+                               preload="metadata"
+                               src="media/sel/boxing-fisheye.mp4"
+                        ></video>
+                    </div>
+
+                    <div class="item">
+                        <video autoplay loop muted playsinline
+                               preload="metadata"
+                               src="media/sel/dancing.mp4"
+                        ></video>
+                    </div>
+
+                    <div class="item">
+                        <video autoplay loop muted playsinline
+                               preload="metadata"
+                               src="media/sel/lindy-hop.mp4"
+                        ></video>
+                    </div>
+
+                    <div class="item">
+                        <video autoplay loop muted playsinline
+                               preload="metadata"
+                               src="media/sel/hike.mp4"
+                        ></video>
+                    </div>
+
+                    <div class="item">
+                        <video autoplay loop muted playsinline
+                               preload="metadata"
+                               src="media/sel/parkour.mp4"
+                        ></video>
+                    </div>
+
+                    <div class="item">
+                        <video autoplay loop muted playsinline
+                               preload="metadata"
+                               src="media/sel/dance-jump.mp4"
+                        ></video>
+                    </div>
+
+                    <div class="item">
+                        <video autoplay loop muted playsinline
+                               preload="metadata"
+                               src="media/sel/tennis.mp4"
+                        ></video>
+                    </div>
+
+                    <div class="item">
+                        <video autoplay loop muted playsinline
+                               preload="metadata"
+                               src="media/sel/lucia.mp4"
+                        ></video>
+                    </div>
+                </div>
+        </div>
+    </div>
+
     <div class="row mb-4">
         <div class="col-md-10 mx-auto">
             <h4 class="mb-3">BibTeX</h4>
@@ -133,3 +197,13 @@
   gtag('config', 'G-H2KJW23TXF');
 </script>
 
+<!-- Bulma carousel -->
+<script src="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.3/dist/js/bulma-carousel.min.js"></script>
+<script>
+    bulmaCarousel.attach('#results-carousel', {
+        slidesToScroll: 1,
+        slidesToShow: 1,
+        loop: true,
+        infinite: true,
+    });
+</script>

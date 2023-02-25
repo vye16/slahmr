@@ -4,14 +4,14 @@ body {
 }
 
 a {
-  color: #1A69D3;
+  color: #1692BB;
   text-decoration: none;
 }
 a:hover {
-  color: #5D91D8;
+  color: #2AB7E6;
 }
 a:active {
-  color: #5D91D8;
+  color: #2AB7E6;
 }
 .header {
     color: #444;
@@ -27,6 +27,37 @@ a:active {
 #paper-title h3 small {
     color: #777;
     font-size: 0.7em
+}
+
+.carousel {
+    overflow: hidden;
+    display: flex;
+    flex-basis: fit-content;
+}
+
+.carousel .item {
+  margin: 5px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.carousel video {
+    width: 100%;
+    margin: 0 auto;
+    border: 5px;
+    padding: 0;
+}
+
+.slider-navigation-previous,
+.slider-navigation-next {
+    background: #d3d3d3;
+    border: 1px solid #d3d3d3;
+    width: 36px;
+    height: 36px;
+}
+
+.slider-pagination .slider-page {
+    background: #aaa;
 }
 
 .container>.row>img.img-responsive,
