@@ -1,0 +1,6 @@
+[submodule "third-party/DROID-SLAM"]
+	path = third-party/DROID-SLAM
+	url = https://github.com/princeton-vl/DROID-SLAM.git
+[submodule "third-party/PHALP_plus/ViTPose"]
+	path = third-party/PHALP_plus/ViTPose
+	url = https://github.com/ViTAE-Transformer/ViTPose.git

@@ -1,0 +1,51 @@
+defaults:
+  - data: posetrack
+  - optim
+  - _self_
+
+model:
+  floor_type: "shared"
+  est_floor: False
+  use_init: True
+  opt_cams: False
+  opt_scale: True
+  async_tracks: True
+
+overwrite: False
+run_opt: False
+run_vis: False
+vis:
+  phases:
+    - motion_chunks
+    - input
+  render_views:
+    - src_cam
+    - above
+    - side
+  make_grid: True
+  overwrite: False
+
+paths:
+  smpl: _DATA/body_models/smplh/neutral/model.npz
+  smpl_kid: _DATA/body_models/smpl_kid_template.npy
+  vposer: _DATA/body_models/vposer_v1_0
+  init_motion_prior: _DATA/humor_ckpts/init_state_prior_gmm
+  humor: _DATA/humor_ckpts/humor/best_model.pth
+
+humor: 
+  in_rot_rep: "mat"
+  out_rot_rep: "aa"
+  latent_size: 48
+  model_data_config: "smpl+joints+contacts"
+  steps_in: 1
+
+fps: 30
+log_root: ../outputs/logs
+log_dir: ${log_root}/${data.type}-${data.split}
+exp_name: ${now:%Y-%m-%d}
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ${log_dir}/${exp_name}/${data.name}

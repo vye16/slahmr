@@ -1,0 +1,17 @@
+type: custom
+split: val
+video: ""
+seq: ""
+root: /path/to/custom
+use_cams: True
+track_ids: "all"
+shot_idx: 0
+start_idx: 0
+end_idx: 200
+split_cameras: True
+name: ${data.seq}-${data.track_ids}-shot-${data.shot_idx}
+sources:
+  images: ${data.root}/images/${data.seq}
+  cameras: ${data.root}/slahmr/cameras/${data.seq}/shot-${data.shot_idx}
+  track: ${data.root}/slahmr/track_preds/${data.seq}
+  shots: ${data.root}/slahmr/shot_idcs/${data.seq}.json

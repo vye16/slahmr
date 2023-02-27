@@ -1,0 +1,51 @@
+optim:
+  options:
+    robust_loss_type: "bisquare"
+    robust_tuning_const: 4.6851
+    joints2d_sigma: 100.0
+    lr: 1.0
+    lbfgs_max_iter: 20
+    save_every: 20
+    vis_every: -1
+    max_chunk_steps: 20
+    save_meshes: False
+
+  root:
+    num_iters: 30
+
+  smpl:
+    num_iters: 0
+
+  smooth:
+    opt_scale: False
+    num_iters: 60
+
+  motion_chunks:
+    chunk_size: 10
+    init_steps: 20
+    chunk_steps: 20
+    opt_cams: True
+
+  loss_weights:
+    joints2d: [0.001, 0.001, 0.001]
+    bg2d: [0.0, 0.000, 0.000]
+    cam_R_smooth : [0.0, 0.0, 0.0]
+    cam_t_smooth : [0.0, 0.0, 0.0]
+      #    bg2d: [0.0, 0.0001, 0.0001]
+      #    cam_R_smooth : [0.0, 1000.0, 1000.0]
+      #    cam_t_smooth : [0.0, 1000.0, 1000.0]
+    joints3d: [0.0, 0.0, 0.0]
+    joints3d_smooth: [1.0, 10.0, 0.0]
+    joints3d_rollout: [0.0, 0.0, 0.0]
+    verts3d: [0.0, 0.0, 0.0]
+    points3d: [0.0, 0.0, 0.0]
+    pose_prior: [0.04, 0.04, 0.04]
+    shape_prior: [0.05, 0.05, 0.05]
+    motion_prior: [0.0, 0.0, 0.075]
+    init_motion_prior: [0.0, 0.0, 0.075]
+    joint_consistency: [0.0, 0.0, 100.0]
+    bone_length: [0.0, 0.0, 2000.0]
+    contact_vel: [0.0, 0.0, 100.0]
+    contact_height: [0.0, 0.0, 10.0]
+    floor_reg: [0.0, 0.0, 0.0]
+#     floor_reg: [0.0, 0.0, 0.167]

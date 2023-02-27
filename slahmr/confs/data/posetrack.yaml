@@ -1,0 +1,17 @@
+type: posetrack
+split: val
+seq: 014286_mpii_train
+root: /path/to/posetrack
+use_cams: True
+track_ids: "all"
+shot_idx: 0
+start_idx: 0
+end_idx: -1
+split_cameras: True
+name: ${data.seq}-${data.track_ids}-shot-${data.shot_idx}
+track_name: track_preds
+sources:
+  images: ${data.root}/images/${data.split}/${data.seq}
+  cameras: ${data.root}/slahmr/${data.split}/cameras/${data.seq}/shot-${data.shot_idx}
+  tracks: ${data.root}/slahmr/${data.split}/${data.track_name}/${data.seq}
+  shots: ${data.root}/slahmr/${data.split}/shot_idcs/${data.seq}.json

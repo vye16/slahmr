@@ -1,0 +1,16 @@
+type: davis
+split: all
+seq: parkour
+root: /path/to/DAVIS
+use_cams: True
+track_ids: "all"
+shot_idx: 0
+start_idx: 0
+end_idx: -1
+split_cameras: True
+name: ${data.seq}-${data.track_ids}-shot-${data.shot_idx}
+sources:
+  images: ${data.root}/JPEGImages/Full-Resolution/${data.seq}
+  cameras: ${data.root}/slahmr/cameras/${data.seq}/shot-${data.shot_idx}
+  tracks: ${data.root}/slahmr/track_preds/${data.seq}
+  shots: ${data.root}/slahmr/shot_idcs/${data.seq}.json

@@ -1,0 +1,18 @@
+type: 3dpw_gt
+split: test
+seq: downtown_runForBus_00
+root: /path/to/3DPW
+use_cams: True
+split_cameras: False
+camera_name: cameras_intrins_split
+shot_idx: 0
+start_idx: 0
+end_idx: 100
+track_ids: "longest-2"
+sources:
+  images: ${data.root}/imageFiles/${data.seq}
+  cameras: ${data.root}/slahmr/${data.camera_name}/${data.seq}/${data.start_idx}-${data.end_idx}
+  intrins: ${data.root}/slahmr/cameras_gt/${data.seq}/intrinsics.txt
+  tracks: ${data.root}/slahmr/track_gt/${data.seq}
+  shots: ${data.root}/slahmr/shot_idcs/${data.seq}.json
+name: ${data.seq}-${data.track_ids}-${data.start_idx}-${data.end_idx}

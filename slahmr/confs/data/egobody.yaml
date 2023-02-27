@@ -1,0 +1,18 @@
+type: egobody
+split: val
+seq: recording_20210921_S11_S10_01
+root: /path/to/egobody
+use_cams: True
+camera_name: cameras_intrins_split
+shot_idx: 0
+start_idx: 0
+end_idx: 100
+split_cameras: False
+track_ids: "all"
+sources:
+  images: ${data.root}/egocentric_color/${data.seq}/**/PV
+  cameras: ${data.root}/slahmr/${data.camera_name}/${data.seq}/${data.start_idx}-${data.end_idx}
+  intrins: ${data.root}/slahmr/cameras_gt/${data.seq}/intrinsics.txt
+  tracks: ${data.root}/slahmr/track_preds/${data.seq}
+  shots: ${data.root}/slahmr/shot_idcs/${data.seq}.json
+name: ${data.seq}-${data.track_ids}-${data.start_idx}-${data.end_idx}

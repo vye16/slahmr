@@ -1,0 +1,13 @@
+defaults:
+  - data: posetrack
+  - _self_
+
+gap: 1
+log_root: outputs
+save_per_frame: False
+print_err: False
+stride: 48
+
+hydra:
+    run:
+        dir: ${log_root}/init/${data.type}-${data.seq}-${data.depth_dir}-${data.fov}fov-gap${gap}
