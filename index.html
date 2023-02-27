@@ -78,9 +78,16 @@
 
     <div class="row mb-3 pt-2">
         <div class="col-md-10 mx-auto">
-			<video autoplay loop muted playsinline width="100%">
-			  <source src="media/teaser_vid.mp4" type="video/mp4">
-			</video>
+            <video
+                class="lazyload"
+                preload="none"
+                playsinline=""
+                muted=""
+                data-autoplay=""
+                data-poster="media/teaser_poster.jpg"
+                src="media/teaser_vid.mp4"
+                width="100%"
+            ></video>
 			<p class="text-justify" style="font-size:90%">
             Given a video of moving people (left), we present <b>SLAHMR</b>: Simultaneous Localication and Human Mesh Recovery,
             a method to recover the global trajectories of the people and cameras in the world coordinate frame (right bottom).
@@ -114,116 +121,164 @@
         <div class="col-md-10 mx-auto">
             <h4>Results on Posetrack</h4>
                 <div id="results-carousel" class="carousel">
+
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/024154.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/024154_preview.jpg"
+                            src="media/posetrack/024154.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/024165.mp4"
-                        ></video>
-                    </div>
-
-
-                    <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/009607.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/024165_preview.jpg"
+                            src="media/posetrack/024165.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/022691.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/009607_preview.jpg"
+                            src="media/posetrack/009607.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/006537.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/022691_preview.jpg"
+                            src="media/posetrack/022691.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/007684.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/006537_preview.jpg"
+                            src="media/posetrack/006537.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/002276.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/007684_preview.jpg"
+                            src="media/posetrack/007684.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/023390.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/002276_preview.jpg"
+                            src="media/posetrack/002276.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/024577.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/023390_preview.jpg"
+                            src="media/posetrack/023390.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/003742-0.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/024577_preview.jpg"
+                            src="media/posetrack/024577.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/003742-1.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/003742-0_preview.jpg"
+                            src="media/posetrack/003742-0.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/024593.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/003742-1_preview.jpg"
+                            src="media/posetrack/003742-1.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/009039.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/024593_preview.jpg"
+                            src="media/posetrack/024593.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/012968.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/009039_preview.jpg"
+                            src="media/posetrack/009039.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/003747.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/012968_preview.jpg"
+                            src="media/posetrack/012968.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
-                               src="media/posetrack/020910.mp4"
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/003747_preview.jpg"
+                            src="media/posetrack/003747.mp4"
+                        ></video>
+                    </div>
+
+                    <div class="item">
+                        <video playsinline loop muted
+                            class="lazyload"
+                            preload="none"
+                            data-autoplay=""
+                            data-poster="media/posetrack/020910_preview.jpg"
+                            src="media/posetrack/020910.mp4"
                         ></video>
                     </div>
                 </div>
@@ -237,57 +292,81 @@
                 <div id="results-carousel" class="carousel">
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video playsinline loop muted
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/davis/dance-circle_preview.jpg"
                                src="media/davis/dance-circle.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/davis/boxing-fisheye_preview.jpg"
                                src="media/davis/boxing-fisheye.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/davis/lindy-hop_preview.jpg"
                                src="media/davis/lindy-hop.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/davis/hike_preview.jpg"
                                src="media/davis/hike.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/davis/parkour_preview.jpg"
                                src="media/davis/parkour.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/davis/dance-jump_preview.jpg"
                                src="media/davis/dance-jump.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/davis/tennis_preview.jpg"
                                src="media/davis/tennis.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/davis/lucia_preview.jpg"
                                src="media/davis/lucia.mp4"
                         ></video>
                     </div>
@@ -302,155 +381,221 @@
                 <div id="results-carousel" class="carousel">
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/002276_mpii_test_comp_glamr_preview.jpg"
                                src="media/glamr/002276_mpii_test_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/002276_mpii_test_comp_phalp_preview.jpg"
                                src="media/phalp/002276_mpii_test_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/006537_mpii_test_comp_glamr_preview.jpg"
                                src="media/glamr/006537_mpii_test_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/006537_mpii_test_comp_phalp_preview.jpg"
                                src="media/phalp/006537_mpii_test_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/007684_mpii_test_comp_glamr_preview.jpg"
                                src="media/glamr/007684_mpii_test_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/007684_mpii_test_comp_phalp_preview.jpg"
                                src="media/phalp/007684_mpii_test_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/009607_mpii_test_comp_glamr_preview.jpg"
                                src="media/glamr/009607_mpii_test_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/009607_mpii_test_comp_phalp_preview.jpg"
                                src="media/phalp/009607_mpii_test_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/023390_mpii_test_comp_glamr_preview.jpg"
                                src="media/glamr/023390_mpii_test_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/023390_mpii_test_comp_phalp_preview.jpg"
                                src="media/phalp/023390_mpii_test_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/002691_mpii_test_comp_glamr_preview.jpg"
                                src="media/glamr/002691_mpii_test_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/002691_mpii_test_comp_phalp_preview.jpg"
                                src="media/phalp/002691_mpii_test_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/012968_mpii_test_comp_glamr_preview.jpg"
                                src="media/glamr/012968_mpii_test_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/012968_mpii_test_comp_phalp_preview.jpg"
                                src="media/phalp/012968_mpii_test_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/009039_mpii_test_comp_glamr_preview.jpg"
                                src="media/glamr/009039_mpii_test_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/009039_mpii_test_comp_phalp_preview.jpg"
                                src="media/phalp/009039_mpii_test_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/016195_mpii_test_comp_glamr_preview.jpg"
                                src="media/glamr/016195_mpii_test_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/016195_mpii_test_comp_phalp_preview.jpg"
                                src="media/phalp/016195_mpii_test_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/recording_20211002_S03_S18_04-all-100-500_comp_glamr_preview.jpg"
                                src="media/glamr/recording_20211002_S03_S18_04-all-100-500_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/recording_20211002_S03_S18_04-all-100-500_comp_phalp_preview.jpg"
                                src="media/phalp/recording_20211002_S03_S18_04-all-100-500_comp_phalp.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/glamr/recording_20220315_S21_S30_02-all-0-100_comp_glamr_preview.jpg"
                                src="media/glamr/recording_20220315_S21_S30_02-all-0-100_comp_glamr.mp4"
                         ></video>
                     </div>
 
                     <div class="item">
-                        <video autoplay loop muted playsinline
-                               preload="metadata"
+                        <video loop muted playsinline
+                               class="lazyload"
+                               preload="none"
+                               data-autoplay=""
+                               data-poster="media/phalp/recording_20220315_S21_S30_02-all-0-100_comp_phalp_preview.jpg"
                                src="media/phalp/recording_20220315_S21_S30_02-all-0-100_comp_phalp.mp4"
                         ></video>
                     </div>
@@ -466,17 +611,23 @@
     <div class="row mb-4">
         <div class="col-md-10 mx-auto">
             <h4>BibTeX</h4>
-            <textarea id="bibtex" class="form-control" readonly>@inproceedings{ye2023slahmr,
-	title = {Decoupling Human and Camera Motion from Videos in the Wild},
-	author = {Ye, Vickie and Pavlakos, Georgios and Malik, Jitendra and Kanazawa, Angjoo},
-	booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
-	month = {June},
-	year = {2023}
+            <textarea id="bibtex" class="form-control" readonly>@misc{https://doi.org/10.48550/arxiv.2302.12827,
+  doi = {10.48550/ARXIV.2302.12827}, 
+  url = {https://arxiv.org/abs/2302.12827},
+  author = {Ye, Vickie and Pavlakos, Georgios and Malik, Jitendra and Kanazawa, Angjoo},
+  title = {Decoupling Human and Camera Motion from Videos in the Wild},
+  publisher = {arXiv},
+  year = {2023},
+  copyright = {Creative Commons Attribution 4.0 International}
 }</textarea>
         </div>
     </div>
 
 </div>
+
+<!-- Laxy loadingi https://github.com/aFarkas/lazysizes -->
+<script src="lazysizes.min.js" async=""></script>
+<script src="ls.unveilhooks.min.js" async=""></script>
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-H2KJW23TXF"></script>
