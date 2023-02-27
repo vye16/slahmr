@@ -24,9 +24,9 @@ a:active {
     height: 12em
 }
 
-#paper-title h3 small {
+#paper-title h2 small {
     color: #777;
-    font-size: 0.7em
+    font-size: 1em
 }
 
 .carousel {
@@ -41,7 +41,7 @@ a:active {
   padding: 0;
 }
 
-.carousel video {
+.carousel .item video {
     width: 100%;
     margin: 0 auto;
     border: 5px;
