@@ -3,9 +3,10 @@
 Official PyTorch implementation of the paper Decoupling Human and Camera Motion from Videos in the Wild
 
 [Project page](https://vye16.github.io/slahmr/)
+
 [ArXiv](https://vye16.github.io/slahmr/)
 
-<img src="./teaser.png" height="400px">
+<img src="./teaser.png">
 
 ## Getting started
 This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU
