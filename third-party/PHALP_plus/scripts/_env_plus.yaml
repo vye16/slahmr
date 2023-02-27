@@ -1,0 +1,32 @@
+name: PHALP
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - pytorch=1.12.0
+  - torchvision=0.13.0
+  - cudatoolkit=11.3
+  - cuda
+  - pip
+  - pip:
+    - opencv-python
+    - joblib
+    - cython
+    - scikit-learn==0.22
+    - scikit-image
+    - git+https://github.com/facebookresearch/detectron2.git
+    - git+https://github.com/JonathonLuiten/TrackEval.git
+    - git+https://github.com/brjathu/pytube.git
+    - git+https://github.com/brjathu/NMR.git
+    - chumpy
+    - pyrender
+    - ipython
+    - gdown
+    - dill
+    - motmetrics
+    - scenedetect[opencv]
+    - einops
+    - mmcv==1.3.9
+    - timm==0.4.9
