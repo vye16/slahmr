@@ -111,10 +111,12 @@ def run_vis(
             grid_path = f"{save_dir}/{dataset.seq_name}_{phase}_grid.mp4"
             make_video_grid_2x2(
                 grid_path,
-                inp_vid_path,
-                f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_src_cam.mp4",
-                f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_above.mp4",
-                f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_side.mp4",
+                [
+                    inp_vid_path,
+                    f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_src_cam.mp4",
+                    f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_above.mp4",
+                    f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_side.mp4",
+                ],
                 overwrite=True,
             )
 

@@ -235,7 +235,7 @@ def get_static_views(seq_name=None, bounds=None):
     return top_pose, side_pose, skip
 
 
-def make_video_grid_2x2(out_path, vid_paths, vid_names, overwrite=False):
+def make_video_grid_2x2(out_path, vid_paths, overwrite=False):
     if os.path.isfile(out_path) and not overwrite:
         print(f"{out_path} already exists, skipping.")
         return
@@ -247,7 +247,7 @@ def make_video_grid_2x2(out_path, vid_paths, vid_names, overwrite=False):
     # resize each input by half and then tile
     # so the output video is the same resolution
     cmd = (
-        f"ffmpeg -i {v1} -i {v2} -i {v3} -i {v4} "
+        f"ffmpeg -i {vid_paths[0]} -i {vid_paths[1]} -i {vid_paths[2]} -i {vid_paths[3]} "
         f"-filter_complex '[0:v]scale=iw/2:ih/2[v0];"
         f"[1:v]scale=iw/2:ih/2[v1];"
         f"[2:v]scale=iw/2:ih/2[v2];"
