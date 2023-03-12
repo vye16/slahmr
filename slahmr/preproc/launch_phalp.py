@@ -17,7 +17,7 @@ def launch_phalp(gpus, seq, img_dir, res_dir, overwrite=False):
     worker_id = cur_proc._identity[0] - 1 if len(cur_proc._identity) > 0 else 0
     gpu = gpus[worker_id % len(gpus)]
 
-    PHALP_DIR = os.path.abspath(f"{__file__}/../../../third_party/PHALP_plus")
+    PHALP_DIR = os.path.abspath(f"{__file__}/../../../third-party/PHALP_plus")
     print("PHALP DIR", PHALP_DIR)
 
     base_path, sample = img_dir.split(seq)[:2]

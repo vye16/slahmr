@@ -10,7 +10,7 @@ from mmpose.apis import inference_top_down_pose_model, init_pose_model, process_
 
 # project root directory
 ROOT_DIR = os.path.abspath(f"{__file__}/../../../../")
-VIT_DIR = os.path.join(ROOT_DIR, "third_party/PHALP_plus/ViTPose")
+VIT_DIR = os.path.join(ROOT_DIR, "third-party/PHALP_plus/ViTPose")
 
 class PoseModel(object):
     MODEL_DICT = {
