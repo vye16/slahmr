@@ -20,7 +20,7 @@ or initialize submodules if already cloned
 git submodule update --init --recursive
 ```
 
-2. Set up conda environment
+2. Set up conda environment (note that creating the environment can take a while, especially the pip installation step has no feedback and can look like its stuck)
 ```
 conda env create -f env.yaml
 conda activate slahmr
@@ -54,6 +54,7 @@ We provide configurations for dataset formats in `slahmr/confs/data`:
 1. Posetrack in `slahmr/confs/data/posetrack.yaml`
 2. Egobody in `slahmr/confs/data/egobody.yaml`
 3. 3DPW in `slahmr/confs/data/3dpw.yaml`
+4. DAVIS in `slahmr/confs/data/davis.yaml`
 5. Custom video in `slahmr/confs/data/video.yaml`
 
 **Please make sure to update all paths to data in the config files.**
