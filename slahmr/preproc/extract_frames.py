@@ -23,7 +23,7 @@ def video_to_frames(
     """
     os.makedirs(out_dir, exist_ok=True)
 
-    arg_str = f"-copyts -vf fps={fps}"
+    arg_str = f"-copyts -qscale:v 2 -vf fps={fps}"
     if down_scale != 1:
         arg_str = f"{arg_str},scale='iw/{down_scale}:ih/{down_scale}'"
     if start_sec > 0:
