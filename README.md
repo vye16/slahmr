@@ -23,7 +23,7 @@ git submodule update --init --recursive
 2. Set up conda environment
 ```
 conda env create -f env.yaml
-conda activate slahmr
+conda activate slahmr5
 ```
 
 Install current source repo
@@ -33,12 +33,12 @@ pip install -e .
 
 Install ViTPose
 ```
-pip install -v -e third_party/PHALP_plus/ViTPose
+pip install -v -e third-party/PHALP_plus/ViTPose
 ```
 
 and DROID-SLAM (will take a while)
 ```
-cd third_party/DROID-SLAM
+cd third-party/DROID-SLAM
 python setup.py install
 ```
 
