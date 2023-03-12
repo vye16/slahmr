@@ -4,7 +4,7 @@ Official PyTorch implementation of the paper Decoupling Human and Camera Motion 
 
 [Project page](https://vye16.github.io/slahmr/)
 
-[ArXiv](https://vye16.github.io/slahmr/)
+[ArXiv](https://arxiv.org/abs/2302.12827)
 
 <img src="./teaser.png">
 
@@ -23,7 +23,7 @@ git submodule update --init --recursive
 2. Set up conda environment
 ```
 conda env create -f env.yaml
-conda activate slahmr
+conda activate slahmr5
 ```
 
 Install current source repo
@@ -33,12 +33,12 @@ pip install -e .
 
 Install ViTPose
 ```
-pip install -v -e third_party/PHALP_plus/ViTPose
+pip install -v -e third-party/PHALP_plus/ViTPose
 ```
 
 and DROID-SLAM (will take a while)
 ```
-cd third_party/DROID-SLAM
+cd third-party/DROID-SLAM
 python setup.py install
 ```
 
@@ -49,12 +49,26 @@ unzip -q slahmr_dependencies.zip
 rm slahmr_dependencies.zip
 ```
 
-## Data
+All models and checkpoints should have been unpacked in `_DATA`.
+
+
+## Fitting to an RGB video:
+For a custom video, you can edit the config file: `slahmr/confs/data/video.yaml`.
+Then, from the `slahmr` directory, you can run:
+```
+python run_opt.py data=video run_opt=True run_vis=True
+```
+
+We use hydra to launch experiments, and all parameters can be found in `slahmr/confs/config.yaml`.
+If you would like to update any aspect of logging or optimization tuning, update the relevant config files.
+
+
+## Fitting to specific datasets:
 We provide configurations for dataset formats in `slahmr/confs/data`:
 1. Posetrack in `slahmr/confs/data/posetrack.yaml`
 2. Egobody in `slahmr/confs/data/egobody.yaml`
 3. 3DPW in `slahmr/confs/data/3dpw.yaml`
-5. Custom video in `slahmr/confs/data/video.yaml`
+4. Custom video in `slahmr/confs/data/video.yaml`
 
 **Please make sure to update all paths to data in the config files.**
 
@@ -75,12 +89,7 @@ python launch_slam.py --type <DATASET_TYPE> --root <DATASET_ROOT> --split <DATAS
 ```
 You can also update the paths to datasets in `slahmr/preproc/datasets.py` for repeated use.
 
-## Run the code
-Make sure all checkpoints have been unpacked `_DATA`.
-We use hydra to launch experiments, and all parameters can be found in `slahmr/confs/config.yaml`.
-If you would like to update any aspect of logging or optimization tuning, update the relevant config files.
-
-From the `slahmr` directory,
+Then, from the `slahmr` directory,
 ```
 python run_opt.py data=<DATA_CFG> run_opt=True run_vis=True
 ```

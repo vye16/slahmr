@@ -11,27 +11,6 @@ This code repository provides a code implementation for our paper PHALP, with in
 
 ## Installation
 
-To install this on siberian, you can do:
-
-```
-conda create -n PHALP_plus python=3.10
-conda activate PHALP_plus
-conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
-
-pip install -r requirements.txt 
-
-pip install mmcv==1.3.9
-cd ViTPose
-pip install -v -e .
-pip install timm==0.4.9 einops
-```
-
-Also, you need to copy the large model weight in the ViTPose folder:
-
-```
-cp -r /home/pavlakos/Projects/slahmr/third_party/PHALP_plus/ViTPose/models ./ViTPose
-```
-
 We recommend creating a clean [conda](https://docs.conda.io/) environment and install all dependencies.
 You can do this as follows:
 ```
