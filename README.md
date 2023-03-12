@@ -33,12 +33,12 @@ pip install -e .
 
 Install ViTPose
 ```
-pip install -v -e third-party/PHALP_plus/ViTPose
+pip install -v -e third_party/PHALP_plus/ViTPose
 ```
 
 and DROID-SLAM (will take a while)
 ```
-cd third-party/DROID-SLAM
+cd third_party/DROID-SLAM
 python setup.py install
 ```
 
