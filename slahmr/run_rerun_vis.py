@@ -8,9 +8,15 @@ import torch
 from omegaconf import OmegaConf
 from scipy.spatial import transform
 
+from slahmr.body_model import run_smpl
 from slahmr.data import dataset, expand_source_paths, get_dataset_from_cfg
 from slahmr.run_vis import get_input_dict, get_results_paths, load_result
-from slahmr.util.loaders import load_config_from_log
+from slahmr.util.loaders import (
+    load_config_from_log,
+    load_smpl_body_model,
+    resolve_cfg_paths,
+)
+from slahmr.util.tensor import get_device, move_to, to_torch
 
 
 def log_to_rerun(
@@ -29,6 +35,7 @@ def log_to_rerun(
 ) -> None:
     # first camera view defines world coordinate system
     # assuming camera is upright, -Y will be up
+    rr.init("slahmr")
     rr.log_view_coordinates("world", up="-Y", timeless=True)
 
     log_input_frames(
@@ -37,10 +44,11 @@ def log_to_rerun(
 
     log_skeleton_2d(dataset)
 
+    # TODO this should be removed, part of input phase
+    # there should be one camera per phase
     log_camera(dataset)
 
     for phase in phases:
-        # TODO log each phase to a separate timeline
         phase_dir = os.path.join(log_dir, phase)
         if phase == "input":
             res = get_input_dict(dataset)
@@ -54,13 +62,13 @@ def log_to_rerun(
             print(f"{phase_dir} does not exist, skipping")
             continue
 
-        log_phase_result(dataset, phase, res)
+        log_phase_result(cfg, dataset, dev_id, phase, res)
 
 
 def log_camera(dataset: dataset.MultiPeopleDataset) -> None:
     """Log camera trajectory to rerun."""
     cam_data = dataset.get_camera_data()
-    num_frames = len(cam_data["cam_R"])
+    num_frames = dataset.seq_len
     for frame_id in range(num_frames):
         translation = cam_data["cam_t"][frame_id]
         rotation_mat = cam_data["cam_R"][frame_id]
@@ -82,11 +90,41 @@ def log_camera(dataset: dataset.MultiPeopleDataset) -> None:
 
 
 def log_phase_result(
-    dataset: dataset.MultiPeopleDataset, phase: str, phase_result: dict
+    cfg, dataset: dataset.MultiPeopleDataset, dev_id, phase: str, phase_result: dict
 ) -> None:
     """Log results from one phase."""
-    # TODO log result from one phase
-    pass
+    B = len(dataset)
+    num_frames = dataset.seq_len
+    loader = torch.utils.data.DataLoader(dataset, batch_size=B, shuffle=False)
+    device = get_device(dev_id)
+    phase_result = move_to(phase_result, device)
+
+    cfg = resolve_cfg_paths(cfg)
+    body_model, _ = load_smpl_body_model(cfg.paths.smpl, B * num_frames, device=device)
+
+    with torch.no_grad():
+        world_smpl = run_smpl(
+            body_model,
+            phase_result["trans"],
+            phase_result["root_orient"],
+            phase_result["pose_body"],
+            phase_result.get("betas", None),
+        )
+
+    vertices = world_smpl["vertices"].numpy(force=True)
+
+    for frame_id in range(num_frames):
+        rr.set_time_sequence("input_frame_id", frame_id)
+        translation = phase_result["cam_t"][1, frame_id].numpy(force=True)
+        rotation_mat = phase_result["cam_R"][1, frame_id].numpy(force=True)
+        rotation_q = transform.Rotation.from_matrix(rotation_mat).as_quat()
+        rr.log_rigid3(
+            "world/camera",
+            child_from_parent=(translation, rotation_q),
+            xyz="RDF",
+        )
+        for i, _ in enumerate(dataset.track_ids):
+            rr.log_mesh(f"world/phase_{phase}/#{i}", vertices[i][frame_id])
 
 
 def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
@@ -99,7 +137,7 @@ def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
 def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
     """Log 2D skeleton to rerun."""
     dataset.load_data()
-    for i, tid in enumerate(dataset.track_ids):
+    for i, track_id in enumerate(dataset.track_ids):
         joints2d = dataset.data_dict["joints2d"][i]  # (T, J, 3)
         for frame_id, frame_joints in enumerate(joints2d):
             # show the results
@@ -225,7 +263,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--phases",
         nargs="*",
-        default=["input", "init", "motion_chunks", "root_fit", "smooth_fit"],
+        # default=["input", "init", "motion_chunks", "root_fit", "smooth_fit"],
+        default=["motion_chunks"],
     )
     parser.add_argument("--gpus", nargs="*", default=[0])
     parser.add_argument(
