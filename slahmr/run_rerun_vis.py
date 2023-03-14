@@ -5,6 +5,7 @@ import os
 import numpy as np
 import rerun as rr
 import torch
+import trimesh
 from omegaconf import OmegaConf
 from scipy.spatial import transform
 
@@ -17,6 +18,7 @@ from slahmr.util.loaders import (
     resolve_cfg_paths,
 )
 from slahmr.util.tensor import get_device, move_to, to_torch
+import open3d as o3d
 
 
 def log_to_rerun(
@@ -112,6 +114,7 @@ def log_phase_result(
         )
 
     vertices = world_smpl["vertices"].numpy(force=True)
+    faces = world_smpl["faces"].numpy(force=True)
 
     for frame_id in range(num_frames):
         rr.set_time_sequence("input_frame_id", frame_id)
@@ -124,7 +127,14 @@ def log_phase_result(
             xyz="RDF",
         )
         for i, _ in enumerate(dataset.track_ids):
-            rr.log_mesh(f"world/phase_{phase}/#{i}", vertices[i][frame_id])
+            mesh = trimesh.Trimesh(vertices[i, frame_id], faces)
+            vertex_normals = mesh.vertex_normals
+            rr.log_mesh(
+                f"world/phase_{phase}/#{i}",
+                vertices[i][frame_id],
+                indices=faces,
+                normals=vertex_normals,
+            )
 
 
 def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
