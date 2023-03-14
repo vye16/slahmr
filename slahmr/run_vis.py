@@ -17,15 +17,9 @@ from optim.output import (
 )
 from util.loaders import load_config_from_log, resolve_cfg_paths, load_smpl_body_model
 from util.tensor import get_device, move_to, detach_all, to_torch
-from vis.output import (
-    prep_result_vis,
-    animate_scene,
-    render_scene_dict,
-    make_video_grid_2x2,
-)
+from vis.output import prep_result_vis, animate_scene, make_video_grid_2x2
 from vis.tools import vis_keypoints
 from vis.viewer import init_viewer
-from vis.render import init_renderer
 
 
 def run_vis(
@@ -109,10 +103,12 @@ def run_vis(
     if make_grid:
         for phase, it in phase_max_iters.items():
             grid_path = f"{save_dir}/{dataset.seq_name}_{phase}_grid.mp4"
-            vid_paths = [inp_vid_path,
-                        f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_src_cam.mp4",
-                        f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_above.mp4",
-                        f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_side.mp4"]
+            vid_paths = [
+                inp_vid_path,
+                f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_src_cam.mp4",
+                f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_above.mp4",
+                f"{save_dir}/{dataset.seq_name}_{phase}_final_{it}_side.mp4",
+            ]
             make_video_grid_2x2(
                 grid_path,
                 vid_paths,

@@ -12,7 +12,7 @@ from body_model import OP_IGNORE_JOINTS
 from geometry.mesh import save_mesh_scenes
 from util.logger import Logger, log_cur_stats
 from util.tensor import move_to, detach_all
-from vis.output import prep_result_vis, render_scene_dict
+from vis.output import prep_result_vis, animate_scene
 
 from .losses import RootLoss, SMPLLoss, MotionLoss
 from .output import save_camera_json
@@ -161,7 +161,7 @@ class StageOptimizer(object):
             Logger.log(f"saving {len(mesh_seqs)} meshes to {scene_dir}")
             save_mesh_scenes(scene_dir, mesh_seqs)
 
-    def render_result(self, res_dir, obs_data, vis=None, num_steps=-1):
+    def vis_result(self, res_dir, obs_data, vis=None, num_steps=-1):
         if vis is None or self.vis_every < 0:
             return
 
@@ -170,13 +170,18 @@ class StageOptimizer(object):
         res_pre = f"{res_dir}/{seq_name}_opt_{self.cur_step:06d}"
         with torch.no_grad():
             pred_dict = self.model.get_optim_result(num_steps=num_steps)
-            scene_dict = prep_result_vis(
-                pred_dict["world"],
+
+        res_dict = detach_all(pred_dict["world"])
+        scene_dict = move_to(
+            prep_result_vis(
+                res_dict,
                 obs_data["vis_mask"],
                 obs_data["track_id"],
                 self.model.body_model,
-            )
-            render_scene_dict(vis, scene_dict, res_pre)
+            ),
+            "cpu",
+        )
+        animate_scene(vis, scene_dict, res_pre, render_views=["src_cam", "above"])
 
     def log_losses(self, stats_dict):
         stats_dict = move_to(detach_all(stats_dict), "cpu")
@@ -248,7 +253,7 @@ class StageOptimizer(object):
                 self.save_checkpoint(out_dir)
 
             if (i + 1) % self.vis_every == 0:  # render
-                self.render_result(res_dir, obs_data, vis)
+                self.vis_result(res_dir, obs_data, vis)
 
             self.cur_step = i
             self.loss.cur_step = i
@@ -284,7 +289,7 @@ class StageOptimizer(object):
         self.cur_step = num_iters
         self.save_checkpoint(out_dir)
         self.save_results(res_dir, seq_name)
-        self.render_result(res_dir, obs_data, vis)
+        self.vis_result(res_dir, obs_data, vis)
 
     def optim_step(self, obs_data, writer=None):
         def closure():
@@ -583,9 +588,9 @@ class MotionOptimizerChunks(MotionOptimizer):
     def forward_pass(self, obs_data):
         return super().forward_pass(obs_data, num_steps=self.end_idx)
 
-    def render_result(self, res_dir, obs_data, vis=None, **kwargs):
+    def vis_result(self, res_dir, obs_data, vis=None, **kwargs):
         print("start, end", self.start_idx, self.end_idx)
-        return super().render_result(res_dir, obs_data, vis=vis, num_steps=self.end_idx)
+        return super().vis_result(res_dir, obs_data, vis=vis, num_steps=self.end_idx)
 
 
 class MotionOptimizerFreeze(MotionOptimizer):

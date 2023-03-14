@@ -25,7 +25,7 @@ from optim.output import (
     save_input_poses,
     save_initial_predictions,
 )
-from vis.render import init_renderer
+from vis.viewer import init_viewer
 
 from util.loaders import (
     load_vposer,
@@ -100,12 +100,12 @@ def run_opt(cfg, dataset, out_dir, device):
     vis_scale = 0.25
     vis = None
     if opts.vis_every > 0:
-        vis = init_renderer(
+        vis = init_viewer(
             dataset.img_size,
             cam_data["intrins"][0],
-            device,
             vis_scale=vis_scale,
             bg_paths=dataset.sel_img_paths,
+            fps=cfg.fps,
         )
     print("OPTIMIZER OPTIONS:", opts)
 
