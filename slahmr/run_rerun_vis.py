@@ -38,7 +38,8 @@ def log_input_frames(dataset: dataset.MultiPeopleDataset, fps: int = 30) -> None
     """Log raw input video to rerun."""
     seconds_per_frame = 1 / fps
     for i, img_path in enumerate(dataset.sel_img_paths):
-        rr.set_time_seconds("input_capture_time", i * seconds_per_frame)
+        rr.set_time_seconds("input_frame_time", i * seconds_per_frame)
+        rr.set_time_sequence("input_frame_id", i)
         rr.log_image_file("input_image", img_path=img_path)
 
 
