@@ -77,13 +77,15 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
             joint_confidence = joints[..., 2].min(axis=-1)  # min conf per joint
             good_joints_xy = joints[joint_confidence > 0.3, :, :2]
 
+            rr.set_time_sequence("input_frame_id", frame_id)
             if len(good_joints_xy):
-                rr.set_time_sequence("input_frame_id", frame_id)
                 rr.log_line_segments(
                     f"input_image/skeleton/#{i}", good_joints_xy.reshape(-2, 2)
                 )
-
-            # TODO how to best handle skeleton out of view? lower alpha would be nice
+            else:
+                # NOTE how to best handle skeleton out of view?
+                # lower alpha might be nicer
+                rr.log_cleared(f"input_image/skeleton/#{i}")
 
 
 def log_to_rrd(log_dir, dev_id, phases, save_dir=None, **kwargs):
