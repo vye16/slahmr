@@ -243,11 +243,13 @@ class HMAR(nn.Module):
         pred_cam_t_bs = pred_cam_t.unsqueeze(1).repeat(1, pred_vertices.size(1), 1)
         verts = pred_vertices + pred_cam_t_bs
 
+        rgb_from_pred = 0
+        mask = 0
         mask_model = []
         loc_ = 0
-        if self.render_engine == "NMR":
-
-            if render:
+        validmask = [mask, mask_model, loc_]
+        if render:  # render full image
+            if self.render_engine == "NMR":
                 if texture is not None:
                     texture_vert = torch.nn.functional.grid_sample(
                         texture, self.uv_sampler.repeat(batch_size, 1, 1, 1).cuda()
@@ -313,42 +315,47 @@ class HMAR(nn.Module):
                     )
                     mask_ = torch.logical_and(loc_, mask_)
                     mask_model.append(mask_)
-
                 mask_model = torch.stack(mask_model, 0)
+
+                validmask = [mask, mask_model, loc_]
+
+            elif self.render_engine == "PYR":
+                rgb_from_pred, validmask = self.renderer.visualize_all(
+                    pred_vertices.cpu().numpy(),
+                    pred_cam_t_bs.cpu().numpy(),
+                    color,
+                    image,
+                    use_image=use_image,
+                )
             else:
-                rgb_from_pred, depth, mask = 0, 0, 0
+                raise NotImplementedError
 
-            zeros_ = torch.zeros(batch_size, 1, 3).cuda()
-            pred_joints = torch.cat((pred_joints, zeros_), 1)
+        zeros_ = torch.zeros(batch_size, 1, 3).cuda()
+        pred_joints = torch.cat((pred_joints, zeros_), 1)
 
-            camera_center = torch.zeros(batch_size, 2)
-            pred_keypoints_2d_smpl = perspective_projection(
-                pred_joints,
-                rotation=torch.eye(3,).unsqueeze(0).expand(batch_size, -1, -1).cuda(),
-                translation=pred_cam_t.cuda(),
-                focal_length=focal_length / img_size,
-                camera_center=camera_center.cuda(),
+        camera_center = torch.zeros(batch_size, 2)
+        pred_keypoints_2d_smpl = perspective_projection(
+            pred_joints,
+            rotation=torch.eye(
+                3,
             )
+            .unsqueeze(0)
+            .expand(batch_size, -1, -1)
+            .cuda(),
+            translation=pred_cam_t.cuda(),
+            focal_length=focal_length / img_size,
+            camera_center=camera_center.cuda(),
+        )
 
-            pred_keypoints_2d_smpl = (pred_keypoints_2d_smpl + 0.5) * img_size
+        pred_keypoints_2d_smpl = (pred_keypoints_2d_smpl + 0.5) * img_size
 
-            return (
-                rgb_from_pred,
-                [mask, mask_model, loc_],
-                pred_keypoints_2d_smpl,
-                pred_joints,
-                pred_cam_t,
-            )
-
-        if render and self.render_engine == "PYR":
-            rgb_from_pred, validmask = self.renderer.visualize_all(
-                pred_vertices.cpu().numpy(),
-                pred_cam_t_bs.cpu().numpy(),
-                color,
-                image,
-                use_image=use_image,
-            )
-            return rgb_from_pred, validmask, 0, 0
+        return (
+            rgb_from_pred,
+            validmask,
+            pred_keypoints_2d_smpl,
+            pred_joints,
+            pred_cam_t,
+        )
 
     def reset_renderer(self, image_size):
         self.image_size = image_size

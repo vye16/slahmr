@@ -44,7 +44,7 @@ def render_frame_main_online(
     img_height, img_width, _ = cv_image.shape
     new_image_size = max(img_height, img_width)
 
-    if phalp_tracker.HMAR.nmr_size != opt.res * opt.render_up_scale:
+    if phalp_tracker.HMAR.image_size != opt.res * opt.render_up_scale:
         phalp_tracker.HMAR.reset_renderer(opt.res * opt.render_up_scale)
 
     new_image_size_x = opt.res * opt.render_up_scale
@@ -162,7 +162,7 @@ def render_frame_main_online(
             ]
 
         if "FAST" not in opt.render_type:
-            if phalp_tracker.HMAR.pyrender_size != opt.res * opt.render_up_scale:
+            if phalp_tracker.HMAR.image_size != opt.res * opt.render_up_scale:
                 phalp_tracker.HMAR.reset_renderer(opt.res * opt.render_up_scale)
             resized_image_small = cv2.resize(
                 resized_image,
