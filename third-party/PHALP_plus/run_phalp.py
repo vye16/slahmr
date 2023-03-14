@@ -62,7 +62,7 @@ def test_tracker(opt, phalp_tracker: PHALP_tracker):
     os.makedirs(vis_dir, exist_ok=True)
 
     phalp_tracker.eval()
-    phalp_tracker.HMAR.reset_nmr(opt.res)
+    phalp_tracker.HMAR.reset_renderer(opt.res)
 
     # initialize vitpose model
     device = "cuda"
@@ -304,6 +304,9 @@ class options:
 
         self.parser.add_argument(
             "--render", type=str2bool, nargs="?", const=True, default=False
+        )
+        self.parser.add_argument(
+            "--render_engine", default="PYR", help="rendering engine to use"
         )
         self.parser.add_argument("--render_type", type=str, default="HUMAN_FULL_FAST")
         self.parser.add_argument("--render_up_scale", type=int, default=2)
