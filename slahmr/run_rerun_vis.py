@@ -6,13 +6,10 @@ import numpy as np
 import rerun as rr
 import torch
 from omegaconf import OmegaConf
+from scipy.spatial import transform
 
 from slahmr.data import dataset, expand_source_paths, get_dataset_from_cfg
-from slahmr.run_vis import (
-    get_input_dict,
-    get_results_paths,
-    load_result,
-)
+from slahmr.run_vis import get_input_dict, get_results_paths, load_result
 from slahmr.util.loaders import load_config_from_log
 
 
@@ -36,7 +33,7 @@ def log_to_rerun(
 
     log_skeleton_2d(dataset)
 
-    # TODO log camera
+    log_camera(dataset)
 
     for phase in phases:
         # TODO log each phase to a separate timeline
@@ -53,11 +50,33 @@ def log_to_rerun(
             print(f"{phase_dir} does not exist, skipping")
             continue
 
-        breakpoint()
+        log_phase_result(dataset, phase, res)
 
 
-def log_phase_result(phase: str, phase_result: dict) -> None:
+def log_camera(dataset: dataset.MultiPeopleDataset) -> None:
+    cam_data = dataset.get_camera_data()
+    num_frames = len(cam_data["cam_R"])
+    for frame_id in range(num_frames):
+        translation = cam_data["cam_t"][frame_id]
+        rotation_mat = cam_data["cam_R"][frame_id]
+        rotation_q = transform.Rotation.from_matrix(rotation_mat).as_quat()
+        fx, fy, cx, cy = cam_data["intrins"][frame_id]
+        width, height = dataset.img_size
+        rr.set_time_sequence("input_frame_id", frame_id)
+        rr.log_pinhole(
+            "camera/image",
+            child_from_parent=[[fx, 0, cx], [0, fy, cy], [0, 0, 1]],
+            width=width,
+            height=height,
+        )
+        rr.log_rigid3("camera", child_from_parent=(translation.numpy(), rotation_q))
+
+
+def log_phase_result(
+    dataset: dataset.MultiPeopleDataset, phase: str, phase_result: dict
+) -> None:
     """Log results from one phase."""
+    # TODO log result from one phase
     pass
 
 
@@ -65,7 +84,7 @@ def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
     """Log raw input video to rerun."""
     for frame_id, img_path in enumerate(dataset.sel_img_paths):
         rr.set_time_sequence("input_frame_id", frame_id)
-        rr.log_image_file("input_image", img_path=img_path)
+        rr.log_image_file("camera/image", img_path=img_path)
 
 
 def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
@@ -107,12 +126,12 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
             rr.set_time_sequence("input_frame_id", frame_id)
             if len(good_joints_xy):
                 rr.log_line_segments(
-                    f"input_image/skeleton/#{i}", good_joints_xy.reshape(-2, 2)
+                    f"camera/image/skeleton/#{i}", good_joints_xy.reshape(-2, 2)
                 )
             else:
                 # NOTE how to best handle skeleton out of view?
                 # lower alpha might be nicer
-                rr.log_cleared(f"input_image/skeleton/#{i}")
+                rr.log_cleared(f"camera/image/skeleton/#{i}")
 
 
 def log_to_rrd(log_dir: str, dev_id, phases, save_dir=None, **kwargs):
