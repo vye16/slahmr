@@ -4,7 +4,7 @@ import os
 
 import rerun as rr
 import torch
-from data import expand_source_paths, get_dataset_from_cfg
+from data import dataset, expand_source_paths, get_dataset_from_cfg
 from omegaconf import OmegaConf
 from util.loaders import load_config_from_log
 
@@ -21,16 +21,25 @@ def log_to_rerun(
     render_layers=False,
     save_frames=False,
     **kwargs,
-):
-    # TODO this should replace run_vis function
-
-    # TODO log input frames
+) -> None:
+    log_input_frames(
+        dataset,
+        fps=cfg.fps,
+    )
 
     # TODO log 2D keypoints
 
     for phase in phases:
         # TODO log each phase to a separate timeline
         pass
+
+
+def log_input_frames(dataset: dataset.MultiPeopleDataset, fps: int = 30) -> None:
+    """Log raw input video to rerun."""
+    seconds_per_frame = 1 / fps
+    for i, img_path in enumerate(dataset.sel_img_paths):
+        rr.set_time_seconds("input_capture_time", i * seconds_per_frame)
+        rr.log_image_file("input_image", img_path=img_path)
 
 
 def log_to_rrd(log_dir, dev_id, phases, save_dir=None, **kwargs):
