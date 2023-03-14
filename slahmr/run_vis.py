@@ -223,11 +223,14 @@ def launch_vis(i, args):
     dev_id = args.gpus[i % len(args.gpus)]
     os.environ["EGL_DEVICE_ID"] = str(dev_id)
     os.environ["PYOPENGL_PLATFORM"] = "egl"
+    path_name = log_dir.split(args.log_root)[-1].strip("/")
+    exp_name = "-".join(path_name.split("/")[:2])
 
     if args.save_root is not None:
-        path_name = log_dir.split(args.log_root)[-1].strip("/")
-        exp_name = "-".join(path_name.split("/")[:2])
         save_dir = f"{args.save_root}/{exp_name}"
+        os.makedirs(save_dir, exist_ok=True)
+    else:
+        save_dir = log_dir
         os.makedirs(save_dir, exist_ok=True)
 
     visualize_log(
