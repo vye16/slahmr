@@ -7,9 +7,9 @@ import subprocess
 from concurrent import futures
 import multiprocessing as mp
 
-from preproc import export_3dpw
-from preproc import export_egobody
-from preproc.datasets import update_args, get_img_dir
+from slahmr.preproc import export_3dpw
+from slahmr.preproc import export_egobody
+from slahmr.preproc.datasets import update_args, get_img_dir
 
 
 SRC_DIR = os.path.abspath(f"{__file__}/../")

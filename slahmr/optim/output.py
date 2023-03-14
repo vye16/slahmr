@@ -7,8 +7,8 @@ import subprocess
 import numpy as np
 import torch
 
-from util.tensor import move_to, detach_all, to_torch
-from util.logger import Logger
+from slahmr.util.tensor import move_to, detach_all, to_torch
+from slahmr.util.logger import Logger
 
 
 def get_results_paths(res_dir):

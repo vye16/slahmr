@@ -6,8 +6,8 @@ import itertools
 import numpy as np
 import pandas as pd
 
-from associate import associate_frame
-from tools import EGOBODY_ROOT
+from .associate import associate_frame
+from .tools import EGOBODY_ROOT
 
 
 """

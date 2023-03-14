@@ -3,9 +3,9 @@ import glob
 import itertools
 import joblib
 
-from eval_3dpw import load_3dpw_params
-from associate import associate_frame
-from tools import TDPW_ROOT
+from .eval_3dpw import load_3dpw_params
+from .associate import associate_frame
+from .tools import TDPW_ROOT
 
 
 """

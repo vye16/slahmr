@@ -1,31 +1,27 @@
 import os
-import glob
 
 import imageio
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
-from data import get_dataset_from_cfg, expand_source_paths
-from optim.output import (
+from slahmr.data import get_dataset_from_cfg, expand_source_paths
+from slahmr.optim.output import (
     get_results_paths,
     load_result,
     save_input_frames,
-    save_input_poses,
 )
-from util.loaders import load_config_from_log, resolve_cfg_paths, load_smpl_body_model
-from util.tensor import get_device, move_to, detach_all, to_torch
-from vis.output import (
+from slahmr.util.loaders import load_config_from_log, resolve_cfg_paths, load_smpl_body_model
+from slahmr.util.tensor import get_device, move_to, to_torch
+from slahmr.vis.output import (
     prep_result_vis,
     animate_scene,
-    render_scene_dict,
     make_video_grid_2x2,
 )
-from vis.tools import vis_keypoints
-from vis.viewer import init_viewer
-from vis.render import init_renderer
+from slahmr.vis.tools import vis_keypoints
+from slahmr.vis.viewer import init_viewer
 
 
 def run_vis(

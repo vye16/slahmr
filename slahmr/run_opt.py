@@ -1,46 +1,41 @@
 import os
-import glob
-import json
-import subprocess
 
-import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+import hydra
+from omegaconf import DictConfig, OmegaConf
 
 from data import get_dataset_from_cfg, expand_source_paths
 
-from humor.humor_model import HumorModel
-from optim.base_scene import BaseSceneModel
-from optim.moving_scene import MovingSceneModel
-from optim.optimizers import (
+from slahmr.humor.humor_model import HumorModel
+from slahmr.optim.base_scene import BaseSceneModel
+from slahmr.optim.moving_scene import MovingSceneModel
+from slahmr.optim.optimizers import (
     RootOptimizer,
     SmoothOptimizer,
     SMPLOptimizer,
     MotionOptimizer,
     MotionOptimizerChunks,
 )
-from optim.output import (
+from slahmr.optim.output import (
     save_track_info,
     save_camera_json,
     save_input_poses,
     save_initial_predictions,
 )
-from vis.render import init_renderer
+from slahmr.vis.render import init_renderer
 
-from util.loaders import (
+from slahmr.util.loaders import (
     load_vposer,
     load_state,
     load_gmm,
     load_smpl_body_model,
     resolve_cfg_paths,
 )
-from util.logger import Logger
-from util.tensor import get_device, move_to, detach_all, to_torch
+from slahmr.util.logger import Logger
+from slahmr.util.tensor import get_device, move_to
 
-from run_vis import run_vis
-
-import hydra
-from omegaconf import DictConfig, OmegaConf
+from slahmr.run_vis import run_vis
 
 
 N_STAGES = 3

@@ -4,12 +4,11 @@ import numpy as np
 import torch
 import subprocess
 
-from body_model import run_smpl
-from geometry import camera as cam_util
-from geometry.mesh import make_batch_mesh
-from geometry.plane import parse_floor_plane, get_plane_transform
-
-from util.tensor import detach_all, to_torch, move_to
+from slahmr.body_model import run_smpl
+from slahmr.geometry import camera as cam_util
+from slahmr.geometry.mesh import make_batch_mesh
+from slahmr.geometry.plane import parse_floor_plane, get_plane_transform
+from slahmr.util.tensor import detach_all, move_to
 
 from .fig_specs import get_seq_figure_skip, get_seq_static_lookat_points
 from .tools import smpl_to_geometry

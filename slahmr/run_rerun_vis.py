@@ -5,14 +5,21 @@ import os
 import numpy as np
 import rerun as rr
 import torch
-from data import dataset, expand_source_paths, get_dataset_from_cfg
 from omegaconf import OmegaConf
-from util.loaders import load_config_from_log
+
+from slahmr.data import dataset, expand_source_paths, get_dataset_from_cfg
+from slahmr.run_vis import (
+    get_input_dict,
+    get_results_paths,
+    load_result,
+)
+from slahmr.util.loaders import load_config_from_log
 
 
 def log_to_rerun(
     cfg,
-    dataset,
+    dataset: dataset.MultiPeopleDataset,
+    log_dir: str,
     dev_id,
     phases=["motion_chunks"],
     render_views=["src_cam", "above", "side"],
@@ -29,9 +36,29 @@ def log_to_rerun(
 
     log_skeleton_2d(dataset)
 
+    # TODO log camera
+
     for phase in phases:
         # TODO log each phase to a separate timeline
-        pass
+        phase_dir = os.path.join(log_dir, phase)
+        if phase == "input":
+            res = get_input_dict(dataset)
+            it = f"{0:06d}"
+
+        elif os.path.isdir(phase_dir):
+            res_path_dict = get_results_paths(phase_dir)
+            it = sorted(res_path_dict.keys())[-1]
+            res = load_result(res_path_dict[it])["world"]
+        else:
+            print(f"{phase_dir} does not exist, skipping")
+            continue
+
+        breakpoint()
+
+
+def log_phase_result(phase: str, phase_result: dict) -> None:
+    """Log results from one phase."""
+    pass
 
 
 def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
@@ -88,7 +115,7 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
                 rr.log_cleared(f"input_image/skeleton/#{i}")
 
 
-def log_to_rrd(log_dir, dev_id, phases, save_dir=None, **kwargs):
+def log_to_rrd(log_dir: str, dev_id, phases, save_dir=None, **kwargs):
     print(log_dir)
     cfg = load_config_from_log(log_dir)
 
@@ -100,7 +127,7 @@ def log_to_rrd(log_dir, dev_id, phases, save_dir=None, **kwargs):
         print("No tracks in dataset, skipping")
         return
 
-    log_to_rerun(cfg, dataset, dev_id, phases=phases, **kwargs)
+    log_to_rerun(cfg, dataset, log_dir, dev_id, phases=phases, **kwargs)
     rr.save(os.path.join(save_dir, "log.rrd"))
 
 

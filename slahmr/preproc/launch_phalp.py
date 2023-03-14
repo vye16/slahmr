@@ -3,8 +3,8 @@ import subprocess
 import multiprocessing as mp
 from concurrent import futures
 
-from preproc.datasets import update_args, get_img_dir
-from preproc.export_phalp import export_sequence_results
+from slahmr.preproc.datasets import update_args, get_img_dir
+from slahmr.preproc.export_phalp import export_sequence_results
 
 
 def launch_phalp(gpus, seq, img_dir, res_dir, overwrite=False):
