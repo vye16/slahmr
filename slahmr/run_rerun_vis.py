@@ -2,6 +2,7 @@
 
 import os
 
+import numpy as np
 import rerun as rr
 import torch
 from data import dataset, expand_source_paths, get_dataset_from_cfg
@@ -24,23 +25,65 @@ def log_to_rerun(
 ) -> None:
     log_input_frames(
         dataset,
-        fps=cfg.fps,
     )
 
-    # TODO log 2D keypoints
+    log_skeleton_2d(dataset)
 
     for phase in phases:
         # TODO log each phase to a separate timeline
         pass
 
 
-def log_input_frames(dataset: dataset.MultiPeopleDataset, fps: int = 30) -> None:
+def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
     """Log raw input video to rerun."""
-    seconds_per_frame = 1 / fps
-    for i, img_path in enumerate(dataset.sel_img_paths):
-        rr.set_time_seconds("input_frame_time", i * seconds_per_frame)
-        rr.set_time_sequence("input_frame_id", i)
+    for frame_id, img_path in enumerate(dataset.sel_img_paths):
+        rr.set_time_sequence("input_frame_id", frame_id)
         rr.log_image_file("input_image", img_path=img_path)
+
+
+def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
+    """Log 2D skeleton."""
+    dataset.load_data()
+    for i, tid in enumerate(dataset.track_ids):
+        joints2d = dataset.data_dict["joints2d"][i]  # (T, J, 3)
+        for frame_id, frame_joints in enumerate(joints2d):
+            # show the results
+            skeleton_ids = np.array(
+                [
+                    [15, 13],
+                    [13, 11],
+                    [16, 14],
+                    [14, 12],
+                    [11, 12],
+                    [5, 11],
+                    [6, 12],
+                    [5, 6],
+                    [5, 7],
+                    [6, 8],
+                    [7, 9],
+                    [8, 10],
+                    [1, 2],
+                    [0, 1],
+                    [0, 2],
+                    [1, 3],
+                    [2, 4],
+                    [3, 5],
+                    [4, 6],
+                ]
+            )
+
+            idcs = [0, 16, 15, 18, 17, 5, 2, 6, 3, 7, 4, 12, 9, 13, 10, 14, 11]
+            joints = frame_joints[idcs][skeleton_ids]
+            joint_confidence = joints[..., 2].min(axis=-1)  # min conf per joint
+            good_joints_xy = joints[joint_confidence > 0.3, :, :2]
+
+            if len(good_joints_xy):
+                rr.set_time_sequence("input_frame_id", frame_id)
+                rr.log_line_segments(
+                    f"input_image/skeleton/#{i}", good_joints_xy.reshape(-2, 2)
+                )
+
+            # TODO how to best handle skeleton out of view? lower alpha would be nice
 
 
 def log_to_rrd(log_dir, dev_id, phases, save_dir=None, **kwargs):
