@@ -27,6 +27,10 @@ def log_to_rerun(
     save_frames=False,
     **kwargs,
 ) -> None:
+    # first camera view defines world coordinate system
+    # assuming camera is upright, -Y will be up
+    rr.log_view_coordinates("world", up="-Y", timeless=True)
+
     log_input_frames(
         dataset,
     )
@@ -54,6 +58,7 @@ def log_to_rerun(
 
 
 def log_camera(dataset: dataset.MultiPeopleDataset) -> None:
+    """Log camera trajectory to rerun."""
     cam_data = dataset.get_camera_data()
     num_frames = len(cam_data["cam_R"])
     for frame_id in range(num_frames):
@@ -64,12 +69,16 @@ def log_camera(dataset: dataset.MultiPeopleDataset) -> None:
         width, height = dataset.img_size
         rr.set_time_sequence("input_frame_id", frame_id)
         rr.log_pinhole(
-            "camera/image",
+            "world/camera/image",
             child_from_parent=[[fx, 0, cx], [0, fy, cy], [0, 0, 1]],
             width=width,
             height=height,
         )
-        rr.log_rigid3("camera", child_from_parent=(translation.numpy(), rotation_q))
+        rr.log_rigid3(
+            "world/camera",
+            child_from_parent=(translation.numpy(), rotation_q),
+            xyz="RDF",
+        )
 
 
 def log_phase_result(
@@ -84,11 +93,11 @@ def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
     """Log raw input video to rerun."""
     for frame_id, img_path in enumerate(dataset.sel_img_paths):
         rr.set_time_sequence("input_frame_id", frame_id)
-        rr.log_image_file("camera/image", img_path=img_path)
+        rr.log_image_file("world/camera/image", img_path=img_path)
 
 
 def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
-    """Log 2D skeleton."""
+    """Log 2D skeleton to rerun."""
     dataset.load_data()
     for i, tid in enumerate(dataset.track_ids):
         joints2d = dataset.data_dict["joints2d"][i]  # (T, J, 3)
@@ -126,12 +135,12 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
             rr.set_time_sequence("input_frame_id", frame_id)
             if len(good_joints_xy):
                 rr.log_line_segments(
-                    f"camera/image/skeleton/#{i}", good_joints_xy.reshape(-2, 2)
+                    f"world/camera/image/skeleton/#{i}", good_joints_xy.reshape(-2, 2)
                 )
             else:
                 # NOTE how to best handle skeleton out of view?
                 # lower alpha might be nicer
-                rr.log_cleared(f"camera/image/skeleton/#{i}")
+                rr.log_cleared(f"world/camera/image/skeleton/#{i}")
 
 
 def log_to_rrd(log_dir: str, dev_id, phases, save_dir=None, **kwargs):
