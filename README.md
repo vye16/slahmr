@@ -18,10 +18,14 @@ or initialize submodules if already cloned
 git submodule update --init --recursive
 ```
 
-2. Set up conda environment. Run ```./install.sh```
-We include the below steps for trouble-shooting.
+2. Set up conda environment. Run 
+```
+./install.sh
+```
 
-    * Create environment
+We also include the following steps for trouble-shooting.
+
+* Create environment
     ```
     conda env create -f env.yaml
     conda activate slahmr
@@ -29,23 +33,27 @@ We include the below steps for trouble-shooting.
     We use PyTorch 1.13.0 with CUDA 11.7. Please modify according to your setup; we've tested successfully for PyTorch 1.11 as well.
     We've also included `env_build.yaml` to speed up installation using already-solved dependencies, though it might not be compatible with your CUDA driver.
 
-    * Install current source repo
+* Install current source repo
     ```
     pip install -e .
     ```
 
-    * Install ViTPose
+* Install ViTPose
     ```
     pip install -v -e third-party/PHALP_plus/ViTPose
     ```
 
-    * Install DROID-SLAM (will take a while)
+* Install DROID-SLAM (will take a while)
     ```
     cd third-party/DROID-SLAM
     python setup.py install
-```
+    ```
 
-3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing). Run ```./download_models.sh```, or
+3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing). Run
+```
+./download_models.shi
+```
+or
 ```
 gdown https://drive.google.com/uc?id=1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW
 unzip -q slahmr_dependencies.zip
