@@ -10,20 +10,21 @@ Official PyTorch implementation of the paper Decoupling Human and Camera Motion 
 This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU.
 
 1. Clone repository and submodules
-```
-git clone --recursive https://github.com/vye16/slahmr.git
-```
-or initialize submodules if already cloned
-```
-git submodule update --init --recursive
-```
+    ```
+    git clone --recursive https://github.com/vye16/slahmr.git
+    ```
+    or initialize submodules if already cloned
+    ```
+    git submodule update --init --recursive
+    ```
 
 2. Set up conda environment. Run 
-```
-./install.sh
-```
+    ```
+    ./install.sh
+    ```
 
-We also include the following steps for trouble-shooting.
+<details>
+    <summary>We also include the following steps for trouble-shooting.</summary>
 
 * Create environment
     ```
@@ -48,19 +49,20 @@ We also include the following steps for trouble-shooting.
     cd third-party/DROID-SLAM
     python setup.py install
     ```
+</details>
 
 3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing). Run
-```
-./download_models.shi
-```
-or
-```
-gdown https://drive.google.com/uc?id=1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW
-unzip -q slahmr_dependencies.zip
-rm slahmr_dependencies.zip
-```
+    ```
+    ./download_models.sh
+    ```
+    or
+    ```
+    gdown https://drive.google.com/uc?id=1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW
+    unzip -q slahmr_dependencies.zip
+    rm slahmr_dependencies.zip
+    ```
 
-All models and checkpoints should have been unpacked in `_DATA`.
+    All models and checkpoints should have been unpacked in `_DATA`.
 
 
 ## Fitting to an RGB video:
