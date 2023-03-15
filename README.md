@@ -2,14 +2,12 @@
 
 Official PyTorch implementation of the paper Decoupling Human and Camera Motion from Videos in the Wild
 
-[Project page](https://vye16.github.io/slahmr/)
-
-[ArXiv](https://arxiv.org/abs/2302.12827)
+[Project page](https://vye16.github.io/slahmr/) | [ArXiv](https://arxiv.org/abs/2302.12827)
 
 <img src="./teaser.png">
 
 ## Getting started
-This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU
+This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU.
 
 1. Clone repository and submodules
 ```
@@ -20,29 +18,34 @@ or initialize submodules if already cloned
 git submodule update --init --recursive
 ```
 
-2. Set up conda environment
-```
-conda env create -f env.yaml
-conda activate slahmr5
+2. Set up conda environment with `./install.sh`.
+We include the below steps for trouble-shooting.
+
+    * Create environment
+    ```
+    conda env create -f env.yaml
+    conda activate slahmr
+    ```
+    We use PyTorch 1.13.0 with CUDA 11.7. Please modify according to your setup; we've tested successfully for PyTorch 1.11 as well.
+    We've also included `env_build.yaml` to speed up installation using already-solved dependencies, though it might not be compatible with your CUDA driver.
+
+    * Install current source repo
+    ```
+    pip install -e .
+    ```
+
+    * Install ViTPose
+    ```
+    pip install -v -e third-party/PHALP_plus/ViTPose
+    ```
+
+    * Install DROID-SLAM (will take a while)
+    ```
+    cd third-party/DROID-SLAM
+    python setup.py install
 ```
 
-Install current source repo
-```
-pip install -e .
-```
-
-Install ViTPose
-```
-pip install -v -e third-party/PHALP_plus/ViTPose
-```
-
-and DROID-SLAM (will take a while)
-```
-cd third-party/DROID-SLAM
-python setup.py install
-```
-
-3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing).
+3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing). Run `./download_models.sh`, or
 ```
 gdown https://drive.google.com/uc?id=1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW
 unzip -q slahmr_dependencies.zip
@@ -114,4 +117,3 @@ If you use our code in your research, please cite the following paper:
     month={June},
     year={2023}
 }
-```
