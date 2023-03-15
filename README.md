@@ -18,7 +18,7 @@ or initialize submodules if already cloned
 git submodule update --init --recursive
 ```
 
-2. Set up conda environment with `./install.sh`.
+2. Set up conda environment. Run ```./install.sh```
 We include the below steps for trouble-shooting.
 
     * Create environment
@@ -45,7 +45,7 @@ We include the below steps for trouble-shooting.
     python setup.py install
 ```
 
-3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing). Run `./download_models.sh`, or
+3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing). Run ```./download_models.sh```, or
 ```
 gdown https://drive.google.com/uc?id=1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW
 unzip -q slahmr_dependencies.zip
