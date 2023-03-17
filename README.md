@@ -6,6 +6,8 @@ Official PyTorch implementation of the paper Decoupling Human and Camera Motion 
 
 <img src="./teaser.png">
 
+##  [<img src="https://i.imgur.com/QCojoJk.png" width="40"> You can run SLAHMR in Google Colab](https://colab.research.google.com/drive/1IFvek5DSgKb80vtSvXAXh1xmBFMJuxeL?usp=sharing)
+
 ## Getting started
 This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU.
 
