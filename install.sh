@@ -4,7 +4,7 @@ conda create -n $NAME python=3.9 -y
 conda run -n $NAME --live-stream conda install suitesparse -c conda-forge -y
 
 # install pytorch using pip, update with appropriate cuda drivers if necessary
-conda run -n $NAME --live-stream pip install torch==1.13.0 torchvision==1.14.0 --index-url https://download.pytorch.org/whl/cu117
+conda run -n $NAME --live-stream pip install torch==1.13.0 torchvision==0.14.0 --index-url https://download.pytorch.org/whl/cu117
 # uncomment if pip installation isn't working
 # conda run -n $NAME --live-stream conda install pytorch=1.13.0 torchvision=0.14.0 pytorch-cuda=11.7 -c pytorch -c nvidia -y
 # install pytorch scatter using pip, update with appropriate cuda drivers if necessary
