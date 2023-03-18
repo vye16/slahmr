@@ -22,7 +22,7 @@ This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU.
 
 2. Set up conda environment. Run 
     ```
-    ./install.sh
+    source install.sh
     ```
 
     <details>
