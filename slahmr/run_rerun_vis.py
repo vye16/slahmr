@@ -18,7 +18,7 @@ from slahmr.util.loaders import (
     load_smpl_body_model,
     resolve_cfg_paths,
 )
-from slahmr.util.tensor import get_device, move_to, to_torch
+from slahmr.util.tensor import get_device, move_to
 
 # define mapping from integer to RGB
 _index_to_color = lambda x, cmap="tab10": colormaps[cmap](x % colormaps[cmap].N)
@@ -38,8 +38,8 @@ def log_to_rerun(
     save_frames=False,
     **kwargs,
 ) -> None:
-    # first camera view defines world coordinate system
-    # assuming camera is upright, -Y will be up
+    # NOTE: first camera view defines world coordinate system
+    #  assuming camera is upright, -Y will be up
     rr.init("slahmr")
     rr.log_view_coordinates("world", up="-Y", timeless=True)
 
@@ -110,7 +110,7 @@ def log_phase_result(
     num_vertices = world_smpl["vertices"].shape[-2]
     num_faces = world_smpl["faces"].shape[-2]
 
-    # faces has no batch dim here, use epxand to avoid copy
+    # faces has no batch dim here, use expand to avoid copy
     meshes = pytorch3d.structures.Meshes(
         verts=world_smpl["vertices"].reshape(num_meshes, num_vertices, 3),
         faces=world_smpl["faces"].expand(num_meshes, num_faces, 3),  
@@ -123,6 +123,9 @@ def log_phase_result(
         .reshape(num_tracks, num_frames, num_vertices, 3)
         .numpy(force=True)
     )
+
+    # NOTE: if the meshes don't deform over time or are similar we could use the same
+    #  vertex normals for all frames and/or tracks
     
     for frame_id in range(num_frames):
         rr.set_time_sequence("input_frame_id", frame_id)
@@ -183,11 +186,9 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
         ]
     )
     idcs = [0, 16, 15, 18, 17, 5, 2, 6, 3, 7, 4, 12, 9, 13, 10, 14, 11]
-    for i, track_id in enumerate(dataset.track_ids):
+    for i, _ in enumerate(dataset.track_ids):
         joints2d = dataset.data_dict["joints2d"][i]  # (T, J, 3)
         for frame_id, frame_joints in enumerate(joints2d):
-            # show the results
-
             joints = frame_joints[idcs][skeleton_ids]
             joint_confidence = joints[..., 2].min(axis=-1)  # min conf per joint
             good_joints_xy = joints[joint_confidence > 0.3, :, :2]
@@ -200,8 +201,6 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
                     color=_index_to_color(i),
                 )
             else:
-                # NOTE how to best handle skeleton out of view?
-                # lower alpha might be nicer
                 rr.log_cleared(f"world/camera/image/skeleton/#{i}")
 
 
