@@ -37,7 +37,7 @@ def log_to_rerun(
 ) -> None:
     # first camera view defines world coordinate system
     # assuming camera is upright, -Y will be up
-    rr.init("slahmr")
+    rr.init("slahmr", spawn=True)
     rr.log_view_coordinates("world", up="-Y", timeless=True)
 
     log_input_frames(
@@ -97,7 +97,7 @@ def log_phase_result(
     """Log results from one phase."""
     B = len(dataset)
     num_frames = dataset.seq_len
-    loader = torch.utils.data.DataLoader(dataset, batch_size=B, shuffle=False)
+    vis_mask = dataset.data_dict["vis_mask"]  # -1 out of frame, 0 occluded, 1 visible
     device = get_device(dev_id)
     phase_result = move_to(phase_result, device)
 
@@ -127,14 +127,19 @@ def log_phase_result(
             xyz="RDF",
         )
         for i, _ in enumerate(dataset.track_ids):
-            mesh = trimesh.Trimesh(vertices[i, frame_id], faces)
-            vertex_normals = mesh.vertex_normals
-            rr.log_mesh(
-                f"world/phase_{phase}/#{i}",
-                vertices[i][frame_id],
-                indices=faces,
-                normals=vertex_normals,
-            )
+            if vis_mask[i][frame_id] >= 0:
+                mesh = trimesh.Trimesh(vertices[i, frame_id], faces)
+                vertex_normals = mesh.vertex_normals
+                rr.log_mesh(
+                    f"world/phase_{phase}/#{i}",
+                    vertices[i][frame_id],
+                    indices=faces,
+                    normals=vertex_normals,
+                )
+            else:
+                rr.log_cleared(
+                    f"world/phase_{phase}/#{i}",
+                )
 
 
 def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
