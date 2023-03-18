@@ -22,8 +22,7 @@ from slahmr.util.loaders import (
 from slahmr.util.tensor import get_device, move_to, to_torch
 
 # define mapping from integer to RGB
-index_to_color = lambda x, cmap="tab10": colormaps[cmap](x % colormaps[cmap].N)
-
+_index_to_color = lambda x, cmap="tab10": colormaps[cmap](x % colormaps[cmap].N)
 
 def log_to_rerun(
     cfg,
@@ -50,9 +49,7 @@ def log_to_rerun(
 
     log_skeleton_2d(dataset)
 
-    # TODO this should be removed, part of input phase
-    # there should be one camera per phase
-    log_camera(dataset)
+    log_pinhole_camera(dataset)
 
     for phase in phases:
         phase_dir = os.path.join(log_dir, phase)
@@ -71,28 +68,18 @@ def log_to_rerun(
         log_phase_result(cfg, dataset, dev_id, phase, res)
 
 
-def log_camera(dataset: dataset.MultiPeopleDataset) -> None:
+def log_pinhole_camera(dataset: dataset.MultiPeopleDataset) -> None:
     """Log camera trajectory to rerun."""
     cam_data = dataset.get_camera_data()
-    num_frames = dataset.seq_len
-    for frame_id in range(num_frames):
-        translation = cam_data["cam_t"][frame_id]
-        rotation_mat = cam_data["cam_R"][frame_id]
-        rotation_q = transform.Rotation.from_matrix(rotation_mat).as_quat()
-        fx, fy, cx, cy = cam_data["intrins"][frame_id]
-        width, height = dataset.img_size
-        rr.set_time_sequence("input_frame_id", frame_id)
-        rr.log_pinhole(
-            "world/camera/image",
-            child_from_parent=[[fx, 0, cx], [0, fy, cy], [0, 0, 1]],
-            width=width,
-            height=height,
-        )
-        rr.log_rigid3(
-            "world/camera",
-            child_from_parent=(translation.numpy(), rotation_q),
-            xyz="RDF",
-        )
+    fx, fy, cx, cy = cam_data["intrins"][0]
+    width, height = dataset.img_size
+    rr.log_pinhole(
+        "world/camera/image",
+        child_from_parent=[[fx, 0, cx], [0, fy, cy], [0, 0, 1]],
+        width=width,
+        height=height,
+        timeless=True,
+    )
 
 
 def log_phase_result(
@@ -139,7 +126,7 @@ def log_phase_result(
                     vertices[i][frame_id],
                     indices=faces,
                     normals=vertex_normals,
-                    albedo_factor=index_to_color(i),
+                    albedo_factor=_index_to_color(i),
                 )
             else:
                 rr.log_cleared(
@@ -195,7 +182,7 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
                 rr.log_line_segments(
                     f"world/camera/image/skeleton/#{i}",
                     good_joints_xy.reshape(-2, 2),
-                    color=index_to_color(i),
+                    color=_index_to_color(i),
                 )
             else:
                 # NOTE how to best handle skeleton out of view?
