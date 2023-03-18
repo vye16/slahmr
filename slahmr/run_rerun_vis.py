@@ -3,10 +3,9 @@
 import os
 
 import numpy as np
-import open3d as o3d
+import pytorch3d.structures
 import rerun as rr
 import torch
-import trimesh
 from matplotlib import colormaps
 from omegaconf import OmegaConf
 from scipy.spatial import transform
@@ -24,6 +23,7 @@ from slahmr.util.tensor import get_device, move_to, to_torch
 # define mapping from integer to RGB
 _index_to_color = lambda x, cmap="tab10": colormaps[cmap](x % colormaps[cmap].N)
 
+
 def log_to_rerun(
     cfg,
     dataset: dataset.MultiPeopleDataset,
@@ -40,7 +40,7 @@ def log_to_rerun(
 ) -> None:
     # first camera view defines world coordinate system
     # assuming camera is upright, -Y will be up
-    rr.init("slahmr", spawn=True)
+    rr.init("slahmr")
     rr.log_view_coordinates("world", up="-Y", timeless=True)
 
     log_input_frames(
@@ -104,9 +104,26 @@ def log_phase_result(
             phase_result.get("betas", None),
         )
 
+    # compute vertex normals on GPU
+    num_tracks = world_smpl["vertices"].shape[0]
+    num_meshes = num_tracks * num_frames
+    num_vertices = world_smpl["vertices"].shape[-2]
+    num_faces = world_smpl["faces"].shape[-2]
+
+    # faces has no batch dim here, use epxand to avoid copy
+    meshes = pytorch3d.structures.Meshes(
+        verts=world_smpl["vertices"].reshape(num_meshes, num_vertices, 3),
+        faces=world_smpl["faces"].expand(num_meshes, num_faces, 3),  
+    )
+
     vertices = world_smpl["vertices"].numpy(force=True)
     faces = world_smpl["faces"].numpy(force=True)
-
+    vertex_normals = (
+        meshes.verts_normals_padded()
+        .reshape(num_tracks, num_frames, num_vertices, 3)
+        .numpy(force=True)
+    )
+    
     for frame_id in range(num_frames):
         rr.set_time_sequence("input_frame_id", frame_id)
         translation = phase_result["cam_t"][1, frame_id].numpy(force=True)
@@ -119,13 +136,11 @@ def log_phase_result(
         )
         for i, _ in enumerate(dataset.track_ids):
             if vis_mask[i][frame_id] >= 0:
-                mesh = trimesh.Trimesh(vertices[i, frame_id], faces)
-                vertex_normals = mesh.vertex_normals
                 rr.log_mesh(
                     f"world/phase_{phase}/#{i}",
-                    vertices[i][frame_id],
+                    vertices[i, frame_id],
                     indices=faces,
-                    normals=vertex_normals,
+                    normals=vertex_normals[i, frame_id],
                     albedo_factor=_index_to_color(i),
                 )
             else:
