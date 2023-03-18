@@ -3,9 +3,11 @@
 import os
 
 import numpy as np
+import open3d as o3d
 import rerun as rr
 import torch
 import trimesh
+from matplotlib import colormaps
 from omegaconf import OmegaConf
 from scipy.spatial import transform
 
@@ -18,7 +20,9 @@ from slahmr.util.loaders import (
     resolve_cfg_paths,
 )
 from slahmr.util.tensor import get_device, move_to, to_torch
-import open3d as o3d
+
+# define mapping from integer to RGB
+index_to_color = lambda x, cmap="tab10": colormaps[cmap](x % colormaps[cmap].N)
 
 
 def log_to_rerun(
@@ -135,6 +139,7 @@ def log_phase_result(
                     vertices[i][frame_id],
                     indices=faces,
                     normals=vertex_normals,
+                    albedo_factor=index_to_color(i),
                 )
             else:
                 rr.log_cleared(
@@ -152,35 +157,35 @@ def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
 def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
     """Log 2D skeleton to rerun."""
     dataset.load_data()
+    skeleton_ids = np.array(
+        [
+            [15, 13],
+            [13, 11],
+            [16, 14],
+            [14, 12],
+            [11, 12],
+            [5, 11],
+            [6, 12],
+            [5, 6],
+            [5, 7],
+            [6, 8],
+            [7, 9],
+            [8, 10],
+            [1, 2],
+            [0, 1],
+            [0, 2],
+            [1, 3],
+            [2, 4],
+            [3, 5],
+            [4, 6],
+        ]
+    )
+    idcs = [0, 16, 15, 18, 17, 5, 2, 6, 3, 7, 4, 12, 9, 13, 10, 14, 11]
     for i, track_id in enumerate(dataset.track_ids):
         joints2d = dataset.data_dict["joints2d"][i]  # (T, J, 3)
         for frame_id, frame_joints in enumerate(joints2d):
             # show the results
-            skeleton_ids = np.array(
-                [
-                    [15, 13],
-                    [13, 11],
-                    [16, 14],
-                    [14, 12],
-                    [11, 12],
-                    [5, 11],
-                    [6, 12],
-                    [5, 6],
-                    [5, 7],
-                    [6, 8],
-                    [7, 9],
-                    [8, 10],
-                    [1, 2],
-                    [0, 1],
-                    [0, 2],
-                    [1, 3],
-                    [2, 4],
-                    [3, 5],
-                    [4, 6],
-                ]
-            )
 
-            idcs = [0, 16, 15, 18, 17, 5, 2, 6, 3, 7, 4, 12, 9, 13, 10, 14, 11]
             joints = frame_joints[idcs][skeleton_ids]
             joint_confidence = joints[..., 2].min(axis=-1)  # min conf per joint
             good_joints_xy = joints[joint_confidence > 0.3, :, :2]
@@ -188,7 +193,9 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
             rr.set_time_sequence("input_frame_id", frame_id)
             if len(good_joints_xy):
                 rr.log_line_segments(
-                    f"world/camera/image/skeleton/#{i}", good_joints_xy.reshape(-2, 2)
+                    f"world/camera/image/skeleton/#{i}",
+                    good_joints_xy.reshape(-2, 2),
+                    color=index_to_color(i),
                 )
             else:
                 # NOTE how to best handle skeleton out of view?
