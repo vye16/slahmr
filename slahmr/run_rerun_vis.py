@@ -30,28 +30,19 @@ def log_to_rerun(
     log_dir: str,
     dev_id,
     phases=["motion_chunks"],
-    render_views=["src_cam", "above", "side"],
-    make_grid=False,
-    overwrite=False,
-    render_kps=True,
-    render_layers=False,
-    save_frames=False,
-    **kwargs,
 ) -> None:
     # NOTE: first camera view defines world coordinate system
     #  assuming camera is upright, -Y will be up
     rr.init("slahmr")
     rr.log_view_coordinates("world", up="-Y", timeless=True)
 
-    log_input_frames(
-        dataset,
-    )
-
-    log_skeleton_2d(dataset)
-
-    log_pinhole_camera(dataset)
-
     for phase in phases:
+        log_input_frames(dataset, phase)
+
+        log_skeleton_2d(dataset, phase)
+
+        log_pinhole_camera(dataset, phase)
+
         phase_dir = os.path.join(log_dir, phase)
         if phase == "input":
             res = get_input_dict(dataset)
@@ -68,18 +59,20 @@ def log_to_rerun(
         log_phase_result(cfg, dataset, dev_id, phase, res)
 
 
-def log_pinhole_camera(dataset: dataset.MultiPeopleDataset) -> None:
+def log_pinhole_camera(dataset: dataset.MultiPeopleDataset, phase: str) -> None:
     """Log camera trajectory to rerun."""
     cam_data = dataset.get_camera_data()
     fx, fy, cx, cy = cam_data["intrins"][0]
     width, height = dataset.img_size
+    rr.set_time_sequence(f"frame_id_{phase}", 0)
+    rr.set_time_sequence("frame_id", 0)
     rr.log_pinhole(
-        "world/camera/image",
+        f"world/phase_{phase}/camera/image",
         child_from_parent=[[fx, 0, cx], [0, fy, cy], [0, 0, 1]],
         width=width,
         height=height,
-        timeless=True,
     )
+    rr.set_time_sequence(f"frame_id_{phase}", None)
 
 
 def log_phase_result(
@@ -113,7 +106,7 @@ def log_phase_result(
     # faces has no batch dim here, use expand to avoid copy
     meshes = pytorch3d.structures.Meshes(
         verts=world_smpl["vertices"].reshape(num_meshes, num_vertices, 3),
-        faces=world_smpl["faces"].expand(num_meshes, num_faces, 3),  
+        faces=world_smpl["faces"].expand(num_meshes, num_faces, 3),
     )
 
     vertices = world_smpl["vertices"].numpy(force=True)
@@ -126,14 +119,15 @@ def log_phase_result(
 
     # NOTE: if the meshes don't deform over time or are similar we could use the same
     #  vertex normals for all frames and/or tracks
-    
+
     for frame_id in range(num_frames):
-        rr.set_time_sequence("input_frame_id", frame_id)
+        rr.set_time_sequence(f"frame_id_{phase}", frame_id)
+        rr.set_time_sequence("frame_id", frame_id)
         translation = phase_result["cam_t"][1, frame_id].numpy(force=True)
         rotation_mat = phase_result["cam_R"][1, frame_id].numpy(force=True)
         rotation_q = transform.Rotation.from_matrix(rotation_mat).as_quat()
         rr.log_rigid3(
-            "world/camera",
+            f"world/phase_{phase}/camera",
             child_from_parent=(translation, rotation_q),
             xyz="RDF",
         )
@@ -150,16 +144,19 @@ def log_phase_result(
                 rr.log_cleared(
                     f"world/phase_{phase}/#{i}",
                 )
+    rr.set_time_sequence(f"frame_id_{phase}", None)
 
 
-def log_input_frames(dataset: dataset.MultiPeopleDataset) -> None:
+def log_input_frames(dataset: dataset.MultiPeopleDataset, phase: str) -> None:
     """Log raw input video to rerun."""
     for frame_id, img_path in enumerate(dataset.sel_img_paths):
-        rr.set_time_sequence("input_frame_id", frame_id)
-        rr.log_image_file("world/camera/image", img_path=img_path)
+        rr.set_time_sequence(f"frame_id_{phase}", frame_id)
+        rr.set_time_sequence("frame_id", frame_id)
+        rr.log_image_file(f"world/phase_{phase}/camera/image", img_path=img_path)
+    rr.set_time_sequence(f"frame_id_{phase}", None)
 
 
-def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
+def log_skeleton_2d(dataset: dataset.MultiPeopleDataset, phase: str) -> None:
     """Log 2D skeleton to rerun."""
     dataset.load_data()
     skeleton_ids = np.array(
@@ -193,18 +190,20 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset) -> None:
             joint_confidence = joints[..., 2].min(axis=-1)  # min conf per joint
             good_joints_xy = joints[joint_confidence > 0.3, :, :2]
 
-            rr.set_time_sequence("input_frame_id", frame_id)
+            rr.set_time_sequence(f"frame_id_{phase}", frame_id)
+            rr.set_time_sequence("frame_id", frame_id)
             if len(good_joints_xy):
                 rr.log_line_segments(
-                    f"world/camera/image/skeleton/#{i}",
+                    f"world/phase_{phase}/camera/image/skeleton/#{i}",
                     good_joints_xy.reshape(-2, 2),
                     color=_index_to_color(i),
                 )
             else:
-                rr.log_cleared(f"world/camera/image/skeleton/#{i}")
+                rr.log_cleared(f"world/phase_{phase}/camera/image/skeleton/#{i}")
+    rr.set_time_sequence(f"frame_id_{phase}", None)
 
 
-def log_to_rrd(log_dir: str, dev_id, phases, save_dir=None, **kwargs):
+def log_to_rrd(log_dir: str, dev_id, phases, save_dir=None):
     print(log_dir)
     cfg = load_config_from_log(log_dir)
 
@@ -216,7 +215,7 @@ def log_to_rrd(log_dir: str, dev_id, phases, save_dir=None, **kwargs):
         print("No tracks in dataset, skipping")
         return
 
-    log_to_rerun(cfg, dataset, log_dir, dev_id, phases=phases, **kwargs)
+    log_to_rerun(cfg, dataset, log_dir, dev_id, phases=phases)
     rr.save(os.path.join(save_dir, "log.rrd"))
 
 
@@ -240,13 +239,6 @@ def launch_rerun_vis(i, args):
         dev_id,
         phases=args.phases,
         save_dir=save_dir,
-        overwrite=args.overwrite,
-        accumulate=args.accumulate,
-        render_kps=args.render_kps,
-        render_layers=args.render_layers,
-        render_views=args.render_views,
-        save_frames=args.save_frames,
-        make_grid=args.grid,
     )
 
 
@@ -286,22 +278,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--phases",
         nargs="*",
-        # default=["input", "init", "motion_chunks", "root_fit", "smooth_fit"],
-        default=["motion_chunks"],
+        default=["init", "root_fit", "smooth_fit", "motion_chunks"],
+        # default=["motion_chunks"],
     )
     parser.add_argument("--gpus", nargs="*", default=[0])
-    parser.add_argument(
-        "-rv",
-        "--render_views",
-        nargs="*",
-        default=["src_cam", "front", "above", "side"],
-    )
-    parser.add_argument("-g", "--grid", action="store_true")
-    parser.add_argument("-rl", "--render_layers", action="store_true")
-    parser.add_argument("-kp", "--render_kps", action="store_true")
-    parser.add_argument("-sf", "--save_frames", action="store_true")
-    parser.add_argument("-ra", "--accumulate", action="store_true")
-    parser.add_argument("-y", "--overwrite", action="store_true")
     args = parser.parse_args()
 
     main(args)
