@@ -44,6 +44,8 @@ def log_to_rerun(
     #  assuming camera is upright, -Y will be up
     rr.log_view_coordinates("world", up="-Y", timeless=True)
 
+    dataset.load_data()
+
     for phase, phase_label in zip(phases, phase_labels):
         log_input_frames(dataset, phase_label)
 
@@ -144,7 +146,7 @@ def log_phase_result(
                 rr.log_mesh(
                     f"world/{phase_label}/#{i}",
                     vertices[i, frame_id],
-                    indices=faces if frame_id == 0 else None,
+                    indices=faces,
                     normals=vertex_normals[i, frame_id],
                     albedo_factor=_index_to_color(i),
                 )
@@ -166,7 +168,6 @@ def log_input_frames(dataset: dataset.MultiPeopleDataset, phase_label: str) -> N
 
 def log_skeleton_2d(dataset: dataset.MultiPeopleDataset, phase_label: str) -> None:
     """Log 2D skeleton to rerun."""
-    dataset.load_data()
     skeleton_ids = np.array(
         [
             [15, 13],
