@@ -95,6 +95,8 @@ python launch.py --gpus 1 2 -f job_specs/pt_val_shots.txt -s data=posetrack exp_
 
 We've also provided a separate `run_vis.py` script for running visualization in bulk.
 
+In addition you can get an interactive visualization of the optimization procedure and the final output using [Rerun](https://github.com/rerun-io/rerun) with `python run_rerun_vis.py --log_root <LOG_DIR>`.
+
 ## BibTeX
 
 If you use our code in your research, please cite the following paper:
