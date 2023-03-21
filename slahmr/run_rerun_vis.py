@@ -1,6 +1,7 @@
 """Visualize SLAHMR results with rerun."""
 
 import os
+from typing import List, Optional
 
 import numpy as np
 import pytorch3d.structures
@@ -25,23 +26,30 @@ _index_to_color = lambda x, cmap="tab10": colormaps[cmap](x % colormaps[cmap].N)
 
 
 def log_to_rerun(
-    cfg,
+    cfg: dict,
     dataset: dataset.MultiPeopleDataset,
     log_dir: str,
-    dev_id,
-    phases=["motion_chunks"],
+    dev_id: int,
+    phases: List[str] = ["motion_chunks"],
+    phase_labels: Optional[List[str]] = None,
 ) -> None:
+    assert phase_labels is None or len(phases) == len(phase_labels)
+
+    if phase_labels is None:
+        phase_labels = [f"{i}_{p}" for i, p in enumerate(phases)]
+
+    rr.init("slahmr")
+
     # NOTE: first camera view defines world coordinate system
     #  assuming camera is upright, -Y will be up
-    rr.init("slahmr")
     rr.log_view_coordinates("world", up="-Y", timeless=True)
 
-    for phase in phases:
-        log_input_frames(dataset, phase)
+    for phase, phase_label in zip(phases, phase_labels):
+        log_input_frames(dataset, phase_label)
 
-        log_skeleton_2d(dataset, phase)
+        log_skeleton_2d(dataset, phase_label)
 
-        log_pinhole_camera(dataset, phase)
+        log_pinhole_camera(dataset, phase_label)
 
         phase_dir = os.path.join(log_dir, phase)
         if phase == "input":
@@ -56,27 +64,27 @@ def log_to_rerun(
             print(f"{phase_dir} does not exist, skipping")
             continue
 
-        log_phase_result(cfg, dataset, dev_id, phase, res)
+        log_phase_result(cfg, dataset, dev_id, phase, phase_label, res)
 
 
-def log_pinhole_camera(dataset: dataset.MultiPeopleDataset, phase: str) -> None:
+def log_pinhole_camera(dataset: dataset.MultiPeopleDataset, phase_label: str) -> None:
     """Log camera trajectory to rerun."""
     cam_data = dataset.get_camera_data()
     fx, fy, cx, cy = cam_data["intrins"][0]
     width, height = dataset.img_size
-    rr.set_time_sequence(f"frame_id_{phase}", 0)
+    rr.set_time_sequence(f"frame_id_{phase_label}", 0)
     rr.set_time_sequence("frame_id", 0)
     rr.log_pinhole(
-        f"world/phase_{phase}/camera/image",
+        f"world/{phase_label}/camera/image",
         child_from_parent=[[fx, 0, cx], [0, fy, cy], [0, 0, 1]],
         width=width,
         height=height,
     )
-    rr.set_time_sequence(f"frame_id_{phase}", None)
+    rr.set_time_sequence(f"frame_id_{phase_label}", None)
 
 
 def log_phase_result(
-    cfg, dataset: dataset.MultiPeopleDataset, dev_id, phase: str, phase_result: dict
+    cfg, dataset: dataset.MultiPeopleDataset, dev_id, phase: str, phase_label: str, phase_result: dict
 ) -> None:
     """Log results from one phase."""
     B = len(dataset)
@@ -121,42 +129,42 @@ def log_phase_result(
     #  vertex normals for all frames and/or tracks
 
     for frame_id in range(num_frames):
-        rr.set_time_sequence(f"frame_id_{phase}", frame_id)
+        rr.set_time_sequence(f"frame_id_{phase_label}", frame_id)
         rr.set_time_sequence("frame_id", frame_id)
         translation = phase_result["cam_t"][1, frame_id].numpy(force=True)
         rotation_mat = phase_result["cam_R"][1, frame_id].numpy(force=True)
         rotation_q = transform.Rotation.from_matrix(rotation_mat).as_quat()
         rr.log_rigid3(
-            f"world/phase_{phase}/camera",
+            f"world/{phase_label}/camera",
             child_from_parent=(translation, rotation_q),
             xyz="RDF",
         )
         for i, _ in enumerate(dataset.track_ids):
             if vis_mask[i][frame_id] >= 0:
                 rr.log_mesh(
-                    f"world/phase_{phase}/#{i}",
+                    f"world/{phase_label}/#{i}",
                     vertices[i, frame_id],
-                    indices=faces,
+                    indices=faces if frame_id == 0 else None,
                     normals=vertex_normals[i, frame_id],
                     albedo_factor=_index_to_color(i),
                 )
             else:
                 rr.log_cleared(
-                    f"world/phase_{phase}/#{i}",
+                    f"world/{phase_label}/#{i}",
                 )
-    rr.set_time_sequence(f"frame_id_{phase}", None)
+    rr.set_time_sequence(f"frame_id_{phase_label}", None)
 
 
-def log_input_frames(dataset: dataset.MultiPeopleDataset, phase: str) -> None:
+def log_input_frames(dataset: dataset.MultiPeopleDataset, phase_label: str) -> None:
     """Log raw input video to rerun."""
     for frame_id, img_path in enumerate(dataset.sel_img_paths):
-        rr.set_time_sequence(f"frame_id_{phase}", frame_id)
+        rr.set_time_sequence(f"frame_id_{phase_label}", frame_id)
         rr.set_time_sequence("frame_id", frame_id)
-        rr.log_image_file(f"world/phase_{phase}/camera/image", img_path=img_path)
-    rr.set_time_sequence(f"frame_id_{phase}", None)
+        rr.log_image_file(f"world/{phase_label}/camera/image", img_path=img_path)
+    rr.set_time_sequence(f"frame_id_{phase_label}", None)
 
 
-def log_skeleton_2d(dataset: dataset.MultiPeopleDataset, phase: str) -> None:
+def log_skeleton_2d(dataset: dataset.MultiPeopleDataset, phase_label: str) -> None:
     """Log 2D skeleton to rerun."""
     dataset.load_data()
     skeleton_ids = np.array(
@@ -190,20 +198,26 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset, phase: str) -> None:
             joint_confidence = joints[..., 2].min(axis=-1)  # min conf per joint
             good_joints_xy = joints[joint_confidence > 0.3, :, :2]
 
-            rr.set_time_sequence(f"frame_id_{phase}", frame_id)
+            rr.set_time_sequence(f"frame_id_{phase_label}", frame_id)
             rr.set_time_sequence("frame_id", frame_id)
             if len(good_joints_xy):
                 rr.log_line_segments(
-                    f"world/phase_{phase}/camera/image/skeleton/#{i}",
+                    f"world/{phase_label}/camera/image/skeleton/#{i}",
                     good_joints_xy.reshape(-2, 2),
                     color=_index_to_color(i),
                 )
             else:
-                rr.log_cleared(f"world/phase_{phase}/camera/image/skeleton/#{i}")
-    rr.set_time_sequence(f"frame_id_{phase}", None)
+                rr.log_cleared(f"world/{phase_label}/camera/image/skeleton/#{i}")
+    rr.set_time_sequence(f"frame_id_{phase_label}", None)
 
 
-def log_to_rrd(log_dir: str, dev_id, phases, save_dir=None):
+def log_to_rrd(
+    log_dir: str,
+    dev_id: int,
+    phases: List[str],
+    save_dir=None,
+    phase_labels: Optional[List[str]] = None,
+):
     print(log_dir)
     cfg = load_config_from_log(log_dir)
 
@@ -215,7 +229,9 @@ def log_to_rrd(log_dir: str, dev_id, phases, save_dir=None):
         print("No tracks in dataset, skipping")
         return
 
-    log_to_rerun(cfg, dataset, log_dir, dev_id, phases=phases)
+    log_to_rerun(
+        cfg, dataset, log_dir, dev_id, phases=phases, phase_labels=phase_labels
+    )
     rr.save(os.path.join(save_dir, "log.rrd"))
 
 
@@ -239,6 +255,7 @@ def launch_rerun_vis(i, args):
         dev_id,
         phases=args.phases,
         save_dir=save_dir,
+        phase_labels=args.phase_labels,
     )
 
 
@@ -281,6 +298,7 @@ if __name__ == "__main__":
         default=["init", "root_fit", "smooth_fit", "motion_chunks"],
         # default=["motion_chunks"],
     )
+    parser.add_argument("--phase_labels", nargs="*", default=None)
     parser.add_argument("--gpus", nargs="*", default=[0])
     args = parser.parse_args()
 
