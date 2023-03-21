@@ -32,13 +32,18 @@ def log_to_rerun(
     dev_id: int,
     phases: List[str] = ["motion_chunks"],
     phase_labels: Optional[List[str]] = None,
+    spawn: bool = False,
 ) -> None:
     assert phase_labels is None or len(phases) == len(phase_labels)
+
+    if len(dataset) < 1:
+        print("No tracks in dataset, skipping")
+        return
 
     if phase_labels is None:
         phase_labels = [f"{i}_{p}" for i, p in enumerate(phases)]
 
-    rr.init("slahmr")
+    rr.init("slahmr", spawn=spawn)
 
     # NOTE: first camera view defines world coordinate system
     #  assuming camera is upright, -Y will be up
@@ -86,7 +91,12 @@ def log_pinhole_camera(dataset: dataset.MultiPeopleDataset, phase_label: str) ->
 
 
 def log_phase_result(
-    cfg, dataset: dataset.MultiPeopleDataset, dev_id, phase: str, phase_label: str, phase_result: dict
+    cfg,
+    dataset: dataset.MultiPeopleDataset,
+    dev_id,
+    phase: str,
+    phase_label: str,
+    phase_result: dict,
 ) -> None:
     """Log results from one phase."""
     B = len(dataset)
@@ -226,12 +236,15 @@ def log_to_rrd(
     cfg.data.sources = expand_source_paths(cfg.data.sources)
     print("SOURCES", cfg.data.sources)
     dataset = get_dataset_from_cfg(cfg)
-    if len(dataset) < 1:
-        print("No tracks in dataset, skipping")
-        return
 
     log_to_rerun(
-        cfg, dataset, log_dir, dev_id, phases=phases, phase_labels=phase_labels
+        cfg,
+        dataset,
+        log_dir,
+        dev_id,
+        phases=phases,
+        phase_labels=phase_labels,
+        spawn=False,
     )
     rr.save(os.path.join(save_dir, "log.rrd"))
 
@@ -247,18 +260,31 @@ def launch_rerun_vis(i, args):
     if args.save_root is not None:
         save_dir = f"{args.save_root}/{exp_name}"
         os.makedirs(save_dir, exist_ok=True)
+
+        log_to_rrd(
+            log_dir,
+            dev_id,
+            phases=args.phases,
+            save_dir=save_dir,
+            phase_labels=args.phase_labels,
+        )
     else:
-        save_dir = log_dir
-        os.makedirs(save_dir, exist_ok=True)
+        print(log_dir)
+        cfg = load_config_from_log(log_dir)
 
-    log_to_rrd(
-        log_dir,
-        dev_id,
-        phases=args.phases,
-        save_dir=save_dir,
-        phase_labels=args.phase_labels,
-    )
-
+        # make sure we get all necessary inputs
+        cfg.data.sources = expand_source_paths(cfg.data.sources)
+        print("SOURCES", cfg.data.sources)
+        dataset = get_dataset_from_cfg(cfg)
+        log_to_rerun(
+            cfg,
+            dataset,
+            log_dir,
+            dev_id,
+            phases=args.phases,
+            phase_labels=args.phase_labels,
+            spawn=True,
+        )
 
 def main(args):
     """
@@ -297,7 +323,6 @@ if __name__ == "__main__":
         "--phases",
         nargs="*",
         default=["init", "root_fit", "smooth_fit", "motion_chunks"],
-        # default=["motion_chunks"],
     )
     parser.add_argument("--phase_labels", nargs="*", default=None)
     parser.add_argument("--gpus", nargs="*", default=[0])
