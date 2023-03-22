@@ -77,6 +77,23 @@ python run_opt.py data=video run_opt=True run_vis=True
 We use hydra to launch experiments, and all parameters can be found in `slahmr/confs/config.yaml`.
 If you would like to update any aspect of logging or optimization tuning, update the relevant config files.
 
+By default, we will log each run to `outputs/video-val/<DATE>/<VIDEO_NAME>`.
+Each stage of optimization will produce a separate subdirectory, each of which will contain outputs saved throughout the optimization
+and rendered videos of the final result for that stage of optimization.
+The `motion_chunks` directory contains the outputs of the final stage of optimization,
+`root_fit` and `smooth_fit` contain outputs of short, intermediate stages of optimization,
+and `init` contains the initialized outputs before optimization.
+
+We've provided a `run_vis.py` script for running visualization from logs after optimization.
+From the `slahmr` directory, run
+```
+python run_vis.py --log_root <LOG_ROOT>
+```
+and it will visualize all log subdirectories in `<LOG_ROOT>`.
+Each output npz file will contain the SMPL parameters for all optimized people, the camera intrinsics and extrinsics.
+The `motion_chunks` output will contain additional predictions from the motion prior.
+Please see `run_vis.py` for how to extract the people meshes from the output parameters.
+
 
 ## Fitting to specific datasets:
 We provide configurations for dataset formats in `slahmr/confs/data`:
@@ -116,7 +133,16 @@ and batch-specific arguments shared across all jobs as
 python launch.py --gpus 1 2 -f job_specs/pt_val_shots.txt -s data=posetrack exp_name=posetrack_val
 ```
 
-We've also provided a separate `run_vis.py` script for running visualization in bulk.
+## Evaluation on 3D datasets
+After launching and completing optimization on either the Egobody or 3DPW datasets,
+you can evaluate the outputs with scripts in the `eval` directory.
+Before running, please update `EGOBODY_ROOT` and `TDPW_ROOT` in `eval/tools.py`.
+Then, run
+```
+python run_eval.py -d <DSET_TYPE> -i <RES_ROOT> -f <JOB_FILE>
+```
+where `<JOB_FILE>` is the same job file used to launch all optimization runs.
+
 
 ## BibTeX
 
