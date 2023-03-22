@@ -1,23 +1,22 @@
+import argparse
 import os
+import time
+import traceback
+import warnings
+
 import cv2
 import imageio
-import time
 import joblib
-import argparse
-import warnings
-import traceback
 import numpy as np
-from tqdm import tqdm
-
-from PHALP import PHALP_tracker
-from models.pose_model import PoseModel
 from deep_sort_ import nn_matching
 from deep_sort_.detection import Detection
 from deep_sort_.tracker import Tracker
-
+from models.pose_model import PoseModel
+from PHALP import PHALP_tracker
+from pytube import YouTube
+from tqdm import tqdm
 from utils.make_video import render_frame_main_online
 from utils.utils import FrameExtractor, str2bool
-from pytube import YouTube
 
 warnings.filterwarnings("ignore")
 

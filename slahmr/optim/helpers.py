@@ -1,9 +1,9 @@
 import numpy as np
 import torch
 
-from body_model import OP_EDGE_LIST
-from geometry.rotation import batch_rodrigues
-from geometry.plane import (
+from slahmr.body_model import OP_EDGE_LIST
+from slahmr.geometry.rotation import batch_rodrigues
+from slahmr.geometry.plane import (
     parse_floor_plane,
     compute_plane_intersection,
     fit_plane,

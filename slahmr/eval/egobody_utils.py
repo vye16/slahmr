@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import torch
 
-from tools import load_body_model, move_to, detach_all, EGOBODY_ROOT
+from .tools import load_body_model, move_to, detach_all, EGOBODY_ROOT
 
 
 def get_sequence_body_info(seq_name):

@@ -1,12 +1,12 @@
-import os
-import json
 import functools
+import json
+import os
 
 import numpy as np
-
-from body_model import OP_NUM_JOINTS
 from scipy.interpolate import interp1d
 from scipy.spatial.transform import Rotation, Slerp
+
+from slahmr.body_model import OP_NUM_JOINTS
 
 
 def read_keypoints(keypoint_fn):

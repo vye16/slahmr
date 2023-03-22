@@ -2,23 +2,21 @@
 Taken from https://github.com/davrempe/humor
 """
 
-import time, os
+import os
+import time
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.normal import Normal
 
-from .amass_utils import data_name_list, data_dim
-from .transforms import (
-    convert_to_rotmat,
-    compute_world2aligned_mat,
-    rotation_matrix_to_angle_axis,
-)
+from slahmr.body_model.body_model import BodyModel
+from slahmr.body_model.specs import SMPL_JOINTS, SMPLH_PATH
 
-from body_model.specs import SMPL_JOINTS, SMPLH_PATH
-from body_model.body_model import BodyModel
-
+from .amass_utils import data_dim, data_name_list
+from .transforms import (compute_world2aligned_mat, convert_to_rotmat,
+                         rotation_matrix_to_angle_axis)
 
 IN_ROT_REPS = ["aa", "6d", "mat"]
 OUT_ROT_REPS = ["aa", "6d", "9d"]

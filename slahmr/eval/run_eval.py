@@ -8,15 +8,15 @@ import pandas as pd
 import numpy as np
 import torch
 
-import egobody_utils as eb_util
-from tools import (
+import .egobody_utils as eb_util
+from .tools import (
     load_body_model,
     load_results_all,
     local_align_joints,
     run_smpl,
     JointRegressor,
 )
-from associate import associate_phalp_track_dirs
+from .associate import associate_phalp_track_dirs
 
 
 TDPW_ROOT = "/path/to/3DPW"

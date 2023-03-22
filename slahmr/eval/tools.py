@@ -7,11 +7,11 @@ import numpy as np
 import smplx
 import torch
 
-from util.loaders import load_smpl_body_model
-from util.tensor import move_to, detach_all, to_torch
-from optim.output import load_result, get_results_paths
-from geometry.pcl import align_pcl
-from geometry.rotation import batch_rodrigues
+from slahmr.util.loaders import load_smpl_body_model
+from slahmr.util.tensor import move_to, detach_all, to_torch
+from slahmr.optim.output import load_result, get_results_paths
+from slahmr.geometry.pcl import align_pcl
+from slahmr.geometry.rotation import batch_rodrigues
 
 BASE_DIR = os.path.abspath(f"{__file__}/../../../")
 JOINT_REG_PATH = f"{BASE_DIR}/_DATA/body_models/J_regressor_h36m.npy"
