@@ -32,7 +32,7 @@ def log_to_rerun(
     dev_id: int,
     phases: List[str] = ["motion_chunks"],
     phase_labels: Optional[List[str]] = None,
-    spawn: bool = False,
+    save_dir: Optional[str] = None,
 ) -> None:
     assert phase_labels is None or len(phases) == len(phase_labels)
 
@@ -43,7 +43,9 @@ def log_to_rerun(
     if phase_labels is None:
         phase_labels = [f"{i}_{p}" for i, p in enumerate(phases)]
 
-    rr.init("slahmr", spawn=spawn)
+    rr.init("slahmr", spawn=save_dir is None)
+    if save_dir is not None:
+        rr.save(os.path.join(save_dir, "log.rrd"))
 
     # NOTE: first camera view defines world coordinate system
     #  assuming camera is upright, -Y will be up
@@ -224,71 +226,6 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset, phase_label: str) -> No
     rr.set_time_sequence(f"frame_id_{phase_label}", None)
 
 
-def log_to_rrd(
-    log_dir: str,
-    dev_id: int,
-    phases: List[str],
-    save_dir=None,
-    phase_labels: Optional[List[str]] = None,
-):
-    print(log_dir)
-    cfg = load_config_from_log(log_dir)
-
-    # make sure we get all necessary inputs
-    cfg.data.sources = expand_source_paths(cfg.data.sources)
-    print("SOURCES", cfg.data.sources)
-    dataset = get_dataset_from_cfg(cfg)
-
-    log_to_rerun(
-        cfg,
-        dataset,
-        log_dir,
-        dev_id,
-        phases=phases,
-        phase_labels=phase_labels,
-        spawn=False,
-    )
-    rr.save(os.path.join(save_dir, "log.rrd"))
-
-
-def launch_rerun_vis(i, args):
-    log_dir = args.log_dirs[i]
-    dev_id = args.gpus[i % len(args.gpus)]
-    os.environ["EGL_DEVICE_ID"] = str(dev_id)
-    os.environ["PYOPENGL_PLATFORM"] = "egl"
-    path_name = log_dir.split(args.log_root)[-1].strip("/")
-    exp_name = "-".join(path_name.split("/")[:2])
-
-    if args.save_root is not None:
-        save_dir = f"{args.save_root}/{exp_name}"
-        os.makedirs(save_dir, exist_ok=True)
-
-        log_to_rrd(
-            log_dir,
-            dev_id,
-            phases=args.phases,
-            save_dir=save_dir,
-            phase_labels=args.phase_labels,
-        )
-    else:
-        print(log_dir)
-        cfg = load_config_from_log(log_dir)
-
-        # make sure we get all necessary inputs
-        cfg.data.sources = expand_source_paths(cfg.data.sources)
-        print("SOURCES", cfg.data.sources)
-        dataset = get_dataset_from_cfg(cfg)
-        log_to_rerun(
-            cfg,
-            dataset,
-            log_dir,
-            dev_id,
-            phases=args.phases,
-            phase_labels=args.phase_labels,
-            spawn=True,
-        )
-
-
 def main(args):
     """
     visualize all runs in root
@@ -301,19 +238,29 @@ def main(args):
     args.log_dirs = log_dirs
     print(f"FOUND {len(args.log_dirs)} TO RENDER")
 
-    if len(args.gpus) > 1:
-        from torch.multiprocessing import Pool
+    for log_dir in args.log_dirs:
+        dev_id = 0
+        path_name = log_dir.split(args.log_root)[-1].strip("/")
+        exp_name = "-".join(path_name.split("/")[:2])
+        cfg = load_config_from_log(log_dir)
+        cfg.data.sources = expand_source_paths(cfg.data.sources)
+        print("SOURCES", cfg.data.sources)
+        dataset = get_dataset_from_cfg(cfg)
 
-        torch.multiprocessing.set_start_method("spawn")
+        save_dir = None
+        if args.save_root:
+            save_dir = f"{args.save_root}/{exp_name}"
+            os.makedirs(save_dir, exist_ok=True)
 
-        with Pool(processes=len(args.gpus)) as pool:
-            res = pool.starmap(
-                launch_rerun_vis, [(i, args) for i in range(len(args.log_dirs))]
-            )
-        return
-
-    for i in range(len(args.log_dirs)):
-        launch_rerun_vis(i, args)
+        log_to_rerun(
+            cfg,
+            dataset,
+            log_dir,
+            dev_id,
+            phases=args.phases,
+            phase_labels=args.phase_labels,
+            save_dir=save_dir,
+        )
 
 
 if __name__ == "__main__":
