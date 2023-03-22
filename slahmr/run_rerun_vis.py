@@ -178,7 +178,8 @@ def log_input_frames(dataset: dataset.MultiPeopleDataset, phase_label: str) -> N
 
 def log_skeleton_2d(dataset: dataset.MultiPeopleDataset, phase_label: str) -> None:
     """Log 2D skeleton to rerun."""
-    skeleton_ids = np.array(
+    # see vis.tools.vis_keypoints and ViTPose/mmpose/apis/inference.py
+    SKELETON_IDS = np.array(
         [
             [15, 13],
             [13, 11],
@@ -201,11 +202,12 @@ def log_skeleton_2d(dataset: dataset.MultiPeopleDataset, phase_label: str) -> No
             [4, 6],
         ]
     )
-    idcs = [0, 16, 15, 18, 17, 5, 2, 6, 3, 7, 4, 12, 9, 13, 10, 14, 11]
+    # see vis.tools.imshow_keypoints
+    IDCS = [0, 16, 15, 18, 17, 5, 2, 6, 3, 7, 4, 12, 9, 13, 10, 14, 11]
     for i, _ in enumerate(dataset.track_ids):
         joints2d = dataset.data_dict["joints2d"][i]  # (T, J, 3)
         for frame_id, frame_joints in enumerate(joints2d):
-            joints = frame_joints[idcs][skeleton_ids]
+            joints = frame_joints[IDCS][SKELETON_IDS]
             joint_confidence = joints[..., 2].min(axis=-1)  # min conf per joint
             good_joints_xy = joints[joint_confidence > 0.3, :, :2]
 
@@ -285,6 +287,7 @@ def launch_rerun_vis(i, args):
             phase_labels=args.phase_labels,
             spawn=True,
         )
+
 
 def main(args):
     """
