@@ -13,13 +13,15 @@ from tools import (
     load_body_model,
     load_results_all,
     local_align_joints,
+    global_align_joints,
+    first_align_joints,
+    compute_accel_norm,
     run_smpl,
     JointRegressor,
+    EGOBODY_ROOT,
+    TDPW_ROOT,
 )
 from associate import associate_phalp_track_dirs
-
-
-TDPW_ROOT = "/path/to/3DPW"
 
 
 def stack_torch(x_list, dim=0):
@@ -105,7 +107,7 @@ def eval_result_dir(
     if dset_type == "egobody":
         # load the GT params
         gt_params = load_egobody_params(seq_name, start, end)
-        phalp_dir = f"{eb_util.EGOBODY_ROOT}/slahmr/track_preds/{seq_name}"
+        phalp_dir = f"{EGOBODY_ROOT}/slahmr/track_preds/{seq_name}"
         img_dir = eb_util.get_egobody_img_dir(seq_name)
     elif dset_type == "3dpw":
         gt_params = load_3dpw_params(seq_name, start, end)
@@ -172,32 +174,44 @@ def eval_result_dir(
 
     # get the outputs of each phase
     PHASES = ["root_fit", "smooth_fit", "motion_chunks"]
-    metrics = [-1, -1, -1]
-    la_jmse = np.nan
+    metric_names = ["ga_jmse", "fa_jmse", "pampjpe", "acc_norm"]
+    phase_metrics = {name: [-1 for _ in PHASE] for name in metric_names}
+    cur_metrics = {name: np.nan for name in metric_names}
     for i, phase in enumerate(PHASES):
         res_dict = load_results_all(os.path.join(res_dir, phase), device)
         if res_dict is None:
             print(f"PHASE {phase} did not optimize")
-            metrics[i] = float(la_jmse)
-            print(phase, la_jmse)
+            # update all metrics for this phase
+            for name in metric_names:
+                phase_metrics[name][i] = float(cur_metrics[name])
+            print(phase, phase_metrics)
             continue
 
         # (M, L, -1, 3) verts, (M, L) mask
         res_verts = res_dict["vertices"][valid_seq]
         res_joints = joint_reg(res_verts)  # (*, 15, 3_
 
-        # only compute PAMPJPE
-        la_res_joints = local_align_joints(gt_seq_joints, res_joints)
-        la_jmse = torch.linalg.norm(gt_seq_joints - la_res_joints, dim=-1).mean()
-        metrics[i] = float(la_jmse)
-        print(phase, la_jmse)
+        for name in metric_names:
+            if name == "acc_norm":
+                target = compute_accel_norm(gt_seq_joints)  # (T-2, J)
+                pred = compute_accel_norm(res_joints)
+            else:
+                target = gt_seq_joints
+                if name == "pampjpe":
+                    pred = local_align_joints(gt_seq_joints, res_joints)
+                if name == "ga_jmse":
+                    pred = global_align_joints(gt_seq_joints, res_joints)
+                if name == "fa_jmse":
+                    pred = first_align_joints(gt_seq_joints, res_joints)
+                else:
+                    raise NotImplementedError
+            cur_metrics[name] = torch.linalg.norm(target - pred, dim=-1).mean()
+            phase_metrics[name][i] = float(cur_metrics[name])
+            print(phase, name, cur_metrics[name])
 
-    df = pd.DataFrame.from_dict(
-        {
-            "phase": PHASES,
-            "pampjpe": metrics,
-        }
-    )
+    df_dict = {"phases": PHASES}
+    df_dict.update(phase_metrics)
+    df = pd.DataFrame.from_dict(df_dict)
     df.to_csv(out_path, index=False)
     print(f"saved metrics to {out_path}")
 
@@ -219,12 +233,13 @@ def parse_job_file(args):
 
 def main(args):
     joint_reg = JointRegressor()
-    subseq_names = parse_job_file(args)
-    os.makedirs(args.out_root, exist_ok=True)
+    out_root = args.out_root if args.out_root is not None else args.res_root
+    os.makedirs(out_root, exist_ok=True)
 
+    subseq_names = parse_job_file(args)
     for subseq in subseq_names:
         res_dir = os.path.join(args.res_root, subseq)
-        out_path = os.path.join(args.out_root, f"{subseq}.txt")
+        out_path = os.path.join(out_root, f"{subseq}.txt")
         eval_result_dir(
             args.dset_type,
             res_dir,
@@ -234,11 +249,11 @@ def main(args):
             debug=args.debug,
         )
 
-    metric_paths = glob.glob(f"{args.out_root}/[!_]*.txt")
+    metric_paths = glob.glob(f"{out_root}/[!_]*.txt")
     dfs = [pd.read_csv(path) for path in metric_paths]
 
     merged = pd.concat(dfs).groupby("phase").mean()
-    merged.to_csv(f"{args.out_root}/_final_pampjpe.txt")
+    merged.to_csv(f"{out_root}/_final_metrics.txt")
     print(merged)
 
 
@@ -246,28 +261,27 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    #     parser.add_argument("--dset_type", default="3dpw")
-    parser.add_argument("--dset_type", default="egobody")
     parser.add_argument(
-        "-i",
-        "--res_root",
-        #         default="../outputs/3dpw/test/2023-01-27-recenter-cam/fixed-shared-floor-cams-fixed",
-        #         default="../../outputs/logs/3dpw_gt/test/2023-02-06-gt",
-        #         default="../../outputs/logs/3dpw_split/test/2023-02-01-v2",
-        #         default="../../outputs/logs/egobody_split/val/2023-02-02-all",
-        default="../../outputs/logs/egobody/val/2023-01-23-rerun",
+        "-d",
+        "--dset_type",
+        required=True,
+        choices=["egobody", "3dpw"],
+        help="dataset to evaluate on, choices: (3dpw, egobody)",
     )
-    #     parser.add_argument("-o", "--out_root", default="../../outputs/metrics/3dpw_gt")
-    #     parser.add_argument("-o", "--out_root", default="../../outputs/metrics/3dpw_split")
-    #     parser.add_argument("-o", "--out_root", default="../../outputs/metrics/egobody_split")
-    parser.add_argument("-o", "--out_root", default="../../outputs/metrics/egobody")
+    parser.add_argument(
+        "-i", "--res_root", required=True, help="root directory of outputs to evaluate"
+    )
     parser.add_argument(
         "-f",
         "--job_file",
-        #         default="../job_specs/3dpw_test_len_100.txt",
-        #         default="../job_specs/3dpw_test_len_100_tracks.txt",
-        #         default="../job_specs/ego_val_len_100_tracks.txt",
-        default="../job_specs/ego_val_len_100.txt",
+        required=True,
+        help="job file specifying the examples to run and evaluate",
+    )
+    parser.add_argument(
+        "-o",
+        "--out_root",
+        default=None,
+        help="directory to save computed metrics, default is res_root",
     )
     parser.add_argument("-y", "--overwrite", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
