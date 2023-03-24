@@ -336,7 +336,7 @@ def get_slam_parser():
     parser.add_argument("--weights", default=f"{ROOT_DIR}/_DATA/droid.pth")
     parser.add_argument("--buffer", type=int, default=512)
     parser.add_argument("--image_size", default=[240, 320])
-    parser.add_argument("--vis", action="store_true")
+    parser.add_argument("--disable_vis", action="store_true")
 
     parser.add_argument(
         "--beta",
@@ -404,5 +404,4 @@ if __name__ == "__main__":
     parser.add_argument("--end", default=-1, type=int, help="end frame")
 
     args = parser.parse_args()
-    args.disable_vis = not args.vis
     main(args)
