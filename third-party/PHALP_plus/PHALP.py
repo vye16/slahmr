@@ -48,20 +48,24 @@ class PHALP_tracker(nn.Module):
         self.HMAR.to(self.device)
         self.HMAR.eval()
 
-        # self.detectron2_cfg = model_zoo.get_config(
-        #    "new_baselines/mask_rcnn_regnety_4gf_dds_FPN_400ep_LSJ.py", trained=True
-        # )
-        # self.detectron2_cfg.model.roi_heads.box_predictor.test_score_thresh = 0.5
-        # self.detectron2_cfg.model.roi_heads.box_predictor.test_nms_thresh = 0.4
+        # less accurate - less memory intensive
+        if self.opt.detection_type == 'mask_regnety':
+            self.detectron2_cfg = model_zoo.get_config(
+               "new_baselines/mask_rcnn_regnety_4gf_dds_FPN_400ep_LSJ.py", trained=True
+            )
+            self.detectron2_cfg.model.roi_heads.box_predictor.test_score_thresh = 0.5
+            self.detectron2_cfg.model.roi_heads.box_predictor.test_nms_thresh = 0.4
 
-        self.detectron2_cfg = LazyConfig.load(
-            "utils/cascade_mask_rcnn_vitdet_h_75ep.py"
-        )
-        self.detectron2_cfg.train.init_checkpoint = "https://dl.fbaipublicfiles.com/detectron2/ViTDet/COCO/cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl"
-        for i in range(3):
-            self.detectron2_cfg.model.roi_heads.box_predictors[
-                i
-            ].test_score_thresh = 0.5
+        # more accurate - more memory intensive
+        elif self.opt.detection_type == 'mask_vitdet':
+            self.detectron2_cfg = LazyConfig.load(
+                "utils/cascade_mask_rcnn_vitdet_h_75ep.py"
+            )
+            self.detectron2_cfg.train.init_checkpoint = "https://dl.fbaipublicfiles.com/detectron2/ViTDet/COCO/cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl"
+            for i in range(3):
+                self.detectron2_cfg.model.roi_heads.box_predictors[
+                    i
+                ].test_score_thresh = 0.5
 
         self.detector = DefaultPredictor_Lazy(self.detectron2_cfg)
         self.detectron2_cfg = get_cfg()
