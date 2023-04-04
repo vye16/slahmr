@@ -308,7 +308,7 @@ def main(args):
         if t < args.t0:
             continue
 
-        if args.vis:
+        if not args.disable_vis:
             show_image(image[0])
 
         if droid is None:
