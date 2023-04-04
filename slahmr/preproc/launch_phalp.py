@@ -50,7 +50,7 @@ def launch_phalp(gpus, seq, img_dir, res_dir, overwrite=False):
         f"--overwrite {overwrite}",
         "--use_gt False",
         "--batch_id -1",
-        "--detection_type mask",
+        "--detection_type mask_vitdet",
         "--start_frame -1",
     ]
 
