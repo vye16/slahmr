@@ -1,7 +1,7 @@
 import os
 
 ROOT_DIR = os.path.abspath(f"{__file__}/../../../")
-SRC_DIR = os.path.join(ROOT_DIR, "third_party/DROID-SLAM")
+SRC_DIR = os.path.join(ROOT_DIR, "third-party/DROID-SLAM")
 print("PROJ SRC", ROOT_DIR)
 print("DROID SRC", SRC_DIR)
 
@@ -18,7 +18,7 @@ from tqdm import tqdm
 import json
 
 import cv2
-import open3d as o3d
+import trimesh
 import numpy as np
 import torch
 
@@ -183,28 +183,36 @@ def get_keyframe_map(video_dict):
     )
 
 
-def array_to_o3d(xyz, rgb=None):
-    xyz = xyz.reshape(-1, 3)
-    points = o3d.utility.Vector3dVector(xyz)
-    pcl = o3d.geometry.PointCloud(points)
-    if rgb is not None:
-        rgb = rgb.reshape(-1, 3)
-        assert rgb.shape == xyz.shape
-        pcl.colors = o3d.utility.Vector3dVector(rgb)
-    return pcl
+def get_frame_cameras(droid, img_paths, intrins_all):
+    N = len(img_paths)
+
+    t = droid.video.counter.value
+    print(f"{t} keyframes in map")
+
+    if t > 1:
+        with torch.no_grad():
+            # localize all frames and get edges into keyframe graph
+            # returns 7D tensor (3D trans, 4D quat)
+            c2w = droid.terminate(image_stream(img_paths, intrins_all))
+        c2w = torch.from_numpy(c2w.astype(np.float32))
+        return SE3(c2w).inv().matrix()
+
+    return torch.eye(4)[None].repeat(N, 1, 1)
 
 
-def save_camera_json(path, extrins, intrins):
+def save_camera_json(path, extrins, intrins, yup=False):
     """
     :param path
     :param extrins (N, 4, 4)
     :param intrins (N, 4)
     """
     N = extrins.shape[0]
-    T = torch.tensor(
-        [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]], dtype=torch.float32
-    )
-    extrins = torch.matmul(T[None], extrins)
+    if yup:
+        T = torch.tensor(
+            [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]],
+            dtype=torch.float32,
+        )
+        extrins = torch.matmul(T[None], extrins)
     with open(path, "w") as f:
         json.dump(
             {
@@ -217,13 +225,19 @@ def save_camera_json(path, extrins, intrins):
         )
 
 
-def save_pcl(path, points, colors):
-    T = torch.tensor(
-        [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]], dtype=torch.float32
-    )
-    points = torch.matmul(T[None, :3, :3], points[..., None])[..., 0]
-    pcl = array_to_o3d(points, colors)
-    o3d.io.write_point_cloud(path, pcl)
+def save_pcl(path, points, colors, yup=False):
+    assert len(points) == len(colors)
+    if yup:
+        T = torch.tensor(
+            [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]],
+            dtype=torch.float32,
+        )
+        points = torch.einsum("ij,...j->...i", T, points)  # (*, 3)
+    points = points.reshape(-1, 3).numpy()
+    colors = colors.reshape(-1, 3).numpy()
+    obj = trimesh.Trimesh(vertices=points, vertex_colors=colors)
+    with open(path, "wb") as f:
+        f.write(trimesh.exchange.ply.export_ply(obj))
 
 
 def save_keyframe_map(out_dir, kf_nodes):
@@ -303,17 +317,14 @@ def main(args):
 
         droid.track(t, image, intrinsics=intrinsics)
 
-    # localize all frames and get edges into keyframe graph
-    # returns 7D tensor (3D trans, 4D quat)
-    c2w = droid.terminate(image_stream(img_paths, intrins_all))
-    c2w = torch.from_numpy(c2w.astype(np.float32))
-    frame_w2c = SE3(c2w).inv().matrix()
     if args.map_dir is None:
         return
 
-    # save cameras and keyframe map
+    # save cameras
+    frame_w2c = get_frame_cameras(droid, img_paths, intrins_all)
     save_cameras(args.map_dir, frame_w2c, intrins_all)
-    # get keyframe poses and points
+
+    # save keyframe cameras and points
     kf_nodes = unpack_video(droid.video)
     save_keyframe_map(args.map_dir, kf_nodes)
 
@@ -336,7 +347,7 @@ def get_slam_parser():
     parser.add_argument(
         "--filter_thresh",
         type=float,
-        default=2.4,
+        default=1.0,
         help="how much motion before considering new keyframe",
     )
     parser.add_argument("--warmup", type=int, default=8, help="number of warmup frames")

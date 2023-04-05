@@ -1,22 +1,22 @@
-import argparse
 import os
-import time
-import traceback
-import warnings
-
 import cv2
 import imageio
+import time
 import joblib
+import argparse
+import warnings
+import traceback
 import numpy as np
+from tqdm import tqdm
+
+from PHALP import PHALP_tracker
+from models.pose_model import PoseModel
 from deep_sort_ import nn_matching
 from deep_sort_.detection import Detection
 from deep_sort_.tracker import Tracker
-from models.pose_model import PoseModel
-from PHALP import PHALP_tracker
-from pytube import YouTube
-from tqdm import tqdm
-from utils.make_video import render_frame_main_online
+
 from utils.utils import FrameExtractor, str2bool
+from pytube import YouTube
 
 warnings.filterwarnings("ignore")
 
@@ -61,7 +61,7 @@ def test_tracker(opt, phalp_tracker: PHALP_tracker):
     os.makedirs(vis_dir, exist_ok=True)
 
     phalp_tracker.eval()
-    phalp_tracker.HMAR.reset_nmr(opt.res)
+    phalp_tracker.HMAR.reset_renderer(opt.res)
 
     # initialize vitpose model
     device = "cuda"
@@ -226,38 +226,10 @@ def test_tracker(opt, phalp_tracker: PHALP_tracker):
                                     track_data_pred_[pkey_.split("_")[1]][-1]
                                 )
 
-            ############ save the video ##############
-            if opt.render and t_ >= opt.n_init:
-                video_path = f"{vis_dir}/{opt.video_seq}_{opt.detection_type}.mp4"
-                d_ = opt.n_init + 1 if (t_ + 1 == len(list_of_frames)) else 1
-                for t__ in range(t_, t_ + d_):
-                    frame_key = list_of_frames[t__ - opt.n_init]
-                    rendered_, f_size = render_frame_main_online(
-                        opt,
-                        phalp_tracker,
-                        frame_key,
-                        final_visuals_dic[frame_key],
-                        opt.track_dataset,
-                        track_id=-100,
-                    )
-                    if t__ - opt.n_init in list_of_shots:
-                        cv2.rectangle(
-                            rendered_, (0, 0), (f_size[0], f_size[1]), (0, 0, 255), 4
-                        )
-                    if t__ - opt.n_init == 0:
-                        writer = imageio.get_writer(video_path, fps=30)
-
-                    writer.append_data(rendered_[..., ::-1])
-                    del final_visuals_dic[frame_key]["frame"]
-                    for tkey_ in tmp_keys_:
-                        del final_visuals_dic[frame_key][tkey_]
-
         joblib.dump(final_visuals_dic, res_file)
         if opt.use_gt:
             gt_file = f"{res_dir}/{opt.video_seq}_{opt.start_frame}_distance.pkl"
             joblib.dump(tracker.tracked_cost, gt_file)
-        if opt.render:
-            writer.close()
 
     except Exception as e:
         print(e)
@@ -303,6 +275,9 @@ class options:
 
         self.parser.add_argument(
             "--render", type=str2bool, nargs="?", const=True, default=False
+        )
+        self.parser.add_argument(
+            "--render_engine", default="PYR", help="rendering engine to use"
         )
         self.parser.add_argument("--render_type", type=str, default="HUMAN_FULL_FAST")
         self.parser.add_argument("--render_up_scale", type=int, default=2)

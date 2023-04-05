@@ -2,54 +2,99 @@
 
 Official PyTorch implementation of the paper Decoupling Human and Camera Motion from Videos in the Wild
 
-[Project page](https://vye16.github.io/slahmr/)
-
-[ArXiv](https://vye16.github.io/slahmr/)
+[Project page](https://vye16.github.io/slahmr/) | [ArXiv](https://arxiv.org/abs/2302.12827)
 
 <img src="./teaser.png">
 
+##  [<img src="https://i.imgur.com/QCojoJk.png" width="40"> You can run SLAHMR in Google Colab](https://colab.research.google.com/drive/1IFvek5DSgKb80vtSvXAXh1xmBFMJuxeL?usp=sharing)
+
 ## Getting started
-This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU
+This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU.
 
 1. Clone repository and submodules
+    ```
+    git clone --recursive https://github.com/vye16/slahmr.git
+    ```
+    or initialize submodules if already cloned
+    ```
+    git submodule update --init --recursive
+    ```
+
+2. Set up conda environment. Run 
+    ```
+    source install.sh
+    ```
+
+    <details>
+        <summary>We also include the following steps for trouble-shooting.</summary>
+
+    * Create environment
+        ```
+        conda env create -f env.yaml
+        conda activate slahmr
+        ```
+        We use PyTorch 1.13.0 with CUDA 11.7. Please modify according to your setup; we've tested successfully for PyTorch 1.11 as well.
+        We've also included `env_build.yaml` to speed up installation using already-solved dependencies, though it might not be compatible with your CUDA driver.
+
+    * Install current source repo
+        ```
+        pip install -e .
+        ```
+
+    * Install ViTPose
+        ```
+        pip install -v -e third-party/PHALP_plus/ViTPose
+        ```
+
+    * Install DROID-SLAM (will take a while)
+        ```
+        cd third-party/DROID-SLAM
+        python setup.py install
+        ```
+    </details>
+
+3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing). Run
+    ```
+    ./download_models.sh
+    ```
+    or
+    ```
+    gdown https://drive.google.com/uc?id=1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW
+    unzip -q slahmr_dependencies.zip
+    rm slahmr_dependencies.zip
+    ```
+
+    All models and checkpoints should have been unpacked in `_DATA`.
+
+
+## Fitting to an RGB video:
+For a custom video, you can edit the config file: `slahmr/confs/data/video.yaml`.
+Then, from the `slahmr` directory, you can run:
 ```
-git clone --recursive https://github.com/vye16/slahmr.git
-```
-or initialize submodules if already cloned
-```
-git submodule update --init --recursive
+python run_opt.py data=video run_opt=True run_vis=True
 ```
 
-2. Set up conda environment (note that creating the environment can take a while, especially the pip installation step has no feedback and can look like its stuck)
-```
-conda env create -f env.yaml
-conda activate slahmr
-```
+We use hydra to launch experiments, and all parameters can be found in `slahmr/confs/config.yaml`.
+If you would like to update any aspect of logging or optimization tuning, update the relevant config files.
 
-Install current source repo
-```
-pip install -e .
-```
+By default, we will log each run to `outputs/video-val/<DATE>/<VIDEO_NAME>`.
+Each stage of optimization will produce a separate subdirectory, each of which will contain outputs saved throughout the optimization
+and rendered videos of the final result for that stage of optimization.
+The `motion_chunks` directory contains the outputs of the final stage of optimization,
+`root_fit` and `smooth_fit` contain outputs of short, intermediate stages of optimization,
+and `init` contains the initialized outputs before optimization.
 
-Install ViTPose
+We've provided a `run_vis.py` script for running visualization from logs after optimization.
+From the `slahmr` directory, run
 ```
-pip install -v -e third-party/PHALP_plus/ViTPose
+python run_vis.py --log_root <LOG_ROOT>
 ```
+and it will visualize all log subdirectories in `<LOG_ROOT>`.
+Each output npz file will contain the SMPL parameters for all optimized people, the camera intrinsics and extrinsics.
+The `motion_chunks` output will contain additional predictions from the motion prior.
+Please see `run_vis.py` for how to extract the people meshes from the output parameters.
 
-and DROID-SLAM (will take a while)
-```
-cd third-party/DROID-SLAM
-python setup.py install
-```
-
-3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing).
-```
-gdown https://drive.google.com/uc?id=1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW
-unzip -q slahmr_dependencies.zip
-rm slahmr_dependencies.zip
-```
-
-## Data
+## Fitting to specific datasets:
 We provide configurations for dataset formats in `slahmr/confs/data`:
 1. Posetrack in `slahmr/confs/data/posetrack.yaml`
 2. Egobody in `slahmr/confs/data/egobody.yaml`
@@ -76,12 +121,7 @@ python launch_slam.py --type <DATASET_TYPE> --root <DATASET_ROOT> --split <DATAS
 ```
 You can also update the paths to datasets in `slahmr/preproc/datasets.py` for repeated use.
 
-## Run the code
-Make sure all checkpoints have been unpacked `_DATA`.
-We use hydra to launch experiments, and all parameters can be found in `slahmr/confs/config.yaml`.
-If you would like to update any aspect of logging or optimization tuning, update the relevant config files.
-
-From the `slahmr` directory,
+Then, from the `slahmr` directory,
 ```
 python run_opt.py data=<DATA_CFG> run_opt=True run_vis=True
 ```
@@ -93,7 +133,16 @@ and batch-specific arguments shared across all jobs as
 python launch.py --gpus 1 2 -f job_specs/pt_val_shots.txt -s data=posetrack exp_name=posetrack_val
 ```
 
-We've also provided a separate `run_vis.py` script for running visualization in bulk.
+## Evaluation on 3D datasets
+After launching and completing optimization on either the Egobody or 3DPW datasets,
+you can evaluate the outputs with scripts in the `eval` directory.
+Before running, please update `EGOBODY_ROOT` and `TDPW_ROOT` in `eval/tools.py`.
+Then, run
+```
+python run_eval.py -d <DSET_TYPE> -i <RES_ROOT> -f <JOB_FILE>
+```
+where `<JOB_FILE>` is the same job file used to launch all optimization runs.
+
 
 In addition you can get an interactive visualization of the optimization procedure and the final output using [Rerun](https://github.com/rerun-io/rerun) with `python run_rerun_vis.py --log_root <LOG_DIR>`.
 
@@ -108,4 +157,3 @@ If you use our code in your research, please cite the following paper:
     month={June},
     year={2023}
 }
-```

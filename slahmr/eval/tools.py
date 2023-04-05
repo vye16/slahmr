@@ -17,19 +17,17 @@ BASE_DIR = os.path.abspath(f"{__file__}/../../../")
 JOINT_REG_PATH = f"{BASE_DIR}/_DATA/body_models/J_regressor_h36m.npy"
 
 
+# XXX: Sorry, need to change this yourself
 EGOBODY_ROOT = "/path/to/egobody"
 TDPW_ROOT = "/path/to/3DPW"
-
 
 
 class JointRegressor(object):
     def __init__(self):
         # (17, 6890)
         R17 = torch.from_numpy(np.load(JOINT_REG_PATH).astype(np.float32))
-        # (15,)  adding the root, but will omit
-        joint_map_h36m = torch.tensor(
-            [0, 6, 5, 4, 1, 2, 3, 16, 15, 14, 11, 12, 13, 8, 10]
-        )
+        # (14,)  adding the root, but will omit
+        joint_map_h36m = torch.tensor([6, 5, 4, 1, 2, 3, 16, 15, 14, 11, 12, 13, 8, 10])
         self.regressor = R17[joint_map_h36m]  # (14, 6890)
 
     def to(self, device):
@@ -39,83 +37,9 @@ class JointRegressor(object):
         """
         NOTE: RETURNS ROOT AS WELL
         :param verts (*, V, 3)
-        returns (*, J, 3) 15 joints, the root + the 14 standard ones
+        returns (*, J, 3) 14 standard evaluation joints
         """
-        return torch.einsum("nv,...vd->...nd", self.regressor, verts)  # (..., 15, 3)
-
-
-class Evaluator(object):
-    def __init__(self):
-        self.metric_names = {
-            "ga_jmse": 0,  # global PA joint MSE
-            "fa_jmse": 1,  # first-frame PA joint MSE
-            "la_jmse": 2,  # local PA joint MSE
-            "ga_root": 3,  # global PA root error
-            "fa_root": 4,  # first-frame PA root error
-            "acc_norm_j": 5,  # mean acceleration norm of joints
-        }
-        self.num_metrics = len(self.metric_names)
-
-    def compute_metrics(self, gt_all, pred_all, metric_names=None):
-        """
-        JOINTS WITH THE ROOT (T, 15, 3)
-        """
-        if metric_names is None:
-            metric_names = self.metric_names.keys()
-        metric_names = set(metric_names)
-        metrics = torch.ones(self.num_metrics) * torch.inf
-        if len(gt_all) < 1:
-            return metrics
-
-        # align all joints
-        try:
-            ga_all = global_align_joints(gt_all, pred_all)  # (T, J, 3)
-            fa_all = first_align_joints(gt_all, pred_all)
-            la_all = local_align_joints(gt_all, pred_all)
-        except Exception as e:
-            print("Exception", e)
-            return metrics
-
-        # separate joints and root
-        pred_root, pred_joints = pred_all[:, :1, :], pred_all[:, 1:, :]
-        ga_root, ga_joints = ga_all[:, :1, :], ga_all[:, 1:, :]
-        fa_root, fa_joints = fa_all[:, :1, :], fa_all[:, 1:, :]
-        la_root, la_joints = la_all[:, :1, :], la_all[:, 1:, :]
-        gt_root, gt_joints = gt_all[:, :1, :], gt_all[:, 1:, :]
-
-        if "ga_jmse" in metric_names:
-            metrics[self.metric_names["ga_jmse"]] = torch.linalg.norm(
-                gt_joints - ga_joints, dim=-1
-            ).mean()
-
-        if "fa_jmse" in metric_names:
-            metrics[self.metric_names["fa_jmse"]] = torch.linalg.norm(
-                gt_joints - fa_joints, dim=-1
-            ).mean()
-
-        if "la_jmse" in metric_names:
-            metrics[self.metric_names["la_jmse"]] = torch.linalg.norm(
-                gt_joints - la_joints, dim=-1
-            ).mean()
-
-        if "ga_root" in metric_names:
-            metrics[self.metric_names["ga_root"]] = torch.linalg.norm(
-                gt_root - ga_root, dim=-1
-            ).mean()
-
-        if "fa_root" in metric_names:
-            metrics[self.metric_names["fa_root"]] = torch.linalg.norm(
-                gt_root - fa_root, dim=-1
-            ).mean()
-
-        if "acc_norm_j" in metric_names:
-            gt_anorm = compute_accel_norm(gt_joints)  # (T-2, J)
-            pred_anorm = compute_accel_norm(pred_joints)
-            metrics[self.metric_names["acc_norm_j"]] = torch.linalg.norm(
-                gt_anorm - pred_anorm, dim=-1
-            ).mean()
-
-        return metrics
+        return torch.einsum("nv,...vd->...nd", self.regressor, verts)  # (..., 14, 3)
 
 
 def compute_accel_norm(joints):

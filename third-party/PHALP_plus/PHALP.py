@@ -23,6 +23,7 @@ from utils.utils import get_prediction_interval
 from scenedetect import AdaptiveDetector
 from utils.utils_scenedetect import detect
 
+
 class PHALP_tracker(nn.Module):
     def __init__(self, opt):
         super(PHALP_tracker, self).__init__()
@@ -47,19 +48,25 @@ class PHALP_tracker(nn.Module):
         self.HMAR.to(self.device)
         self.HMAR.eval()
 
-        #self.detectron2_cfg = model_zoo.get_config(
-        #    "new_baselines/mask_rcnn_regnety_4gf_dds_FPN_400ep_LSJ.py", trained=True
-        #)
-        #self.detectron2_cfg.model.roi_heads.box_predictor.test_score_thresh = 0.5
-        #self.detectron2_cfg.model.roi_heads.box_predictor.test_nms_thresh = 0.4
+        # less accurate - less memory intensive
+        if self.opt.detection_type == 'mask_regnety':
+            self.detectron2_cfg = model_zoo.get_config(
+               "new_baselines/mask_rcnn_regnety_4gf_dds_FPN_400ep_LSJ.py", trained=True
+            )
+            self.detectron2_cfg.model.roi_heads.box_predictor.test_score_thresh = 0.5
+            self.detectron2_cfg.model.roi_heads.box_predictor.test_nms_thresh = 0.4
 
-        self.detectron2_cfg = LazyConfig.load(
-            'utils/cascade_mask_rcnn_vitdet_h_75ep.py'
-        )
-        self.detectron2_cfg.train.init_checkpoint = 'https://dl.fbaipublicfiles.com/detectron2/ViTDet/COCO/cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl'
-        for i in range(3):
-            self.detectron2_cfg.model.roi_heads.box_predictors[i].test_score_thresh = 0.5
-        
+        # more accurate - more memory intensive
+        elif self.opt.detection_type == 'mask_vitdet':
+            self.detectron2_cfg = LazyConfig.load(
+                "utils/cascade_mask_rcnn_vitdet_h_75ep.py"
+            )
+            self.detectron2_cfg.train.init_checkpoint = "https://dl.fbaipublicfiles.com/detectron2/ViTDet/COCO/cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl"
+            for i in range(3):
+                self.detectron2_cfg.model.roi_heads.box_predictors[
+                    i
+                ].test_score_thresh = 0.5
+
         self.detector = DefaultPredictor_Lazy(self.detectron2_cfg)
         self.detectron2_cfg = get_cfg()
         self.detectron2_cfg.merge_from_file(
@@ -224,8 +231,8 @@ class PHALP_tracker(nn.Module):
         with torch.no_grad():
             t_emb = self.HMAR.autoencoder_hmar(t_uv.unsqueeze(0), en=True)
             d_emb = self.HMAR.autoencoder_hmar(d_uv.unsqueeze(0), en=True)
-        t_emb = t_emb.view(-1) / 10**3
-        d_emb = d_emb.view(-1) / 10**3
+        t_emb = t_emb.view(-1) / 10 ** 3
+        d_emb = d_emb.view(-1) / 10 ** 3
         return (
             t_emb.cpu().numpy(),
             d_emb.cpu().numpy(),
@@ -235,7 +242,7 @@ class PHALP_tracker(nn.Module):
     def get_human_apl(
         self, image, mask, bbox, score, frame_name, mask_name, t_, measurments, gt=1
     ):
-        self.HMAR.reset_nmr(self.opt.res)
+        self.HMAR.reset_renderer(self.opt.res)
 
         img_height, img_width, new_image_size, left, top = measurments
         mask_a = mask.astype(int) * 255
@@ -280,15 +287,8 @@ class PHALP_tracker(nn.Module):
                 pose_embedding.float()
             )
             pred_smpl_params = {k: v.cpu().numpy() for k, v in pred_smpl_params.items()}
-            pred_joints_2d_ = (
-                pred_joints_2d.reshape(
-                    -1,
-                )
-                / self.opt.res
-            )
-            pred_cam_ = pred_cam.view(
-                -1,
-            )
+            pred_joints_2d_ = pred_joints_2d.reshape(-1,) / self.opt.res
+            pred_cam_ = pred_cam.view(-1,)
             pred_joints_2d_.contiguous()
             pred_cam_.contiguous()
             loca_embedding = torch.cat(

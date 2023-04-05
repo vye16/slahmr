@@ -37,7 +37,11 @@ def prep_result_vis(res, vis_mask, track_ids, body_model):
     if "floor_plane" in res:
         floor_plane = res["floor_plane"][0]
     return build_scene_dict(
-        world_smpl, vis_mask, track_ids, T_w2c=T_w2c, floor_plane=floor_plane,
+        world_smpl,
+        vis_mask,
+        track_ids,
+        T_w2c=T_w2c,
+        floor_plane=floor_plane,
     )
 
 
@@ -168,6 +172,8 @@ def build_pyrender_scene(
     if len(render_views) < 1:
         return
 
+    assert all(view in ["src_cam", "front", "above", "side"] for view in render_views)
+
     scene = move_to(detach_all(scene), "cpu")
     src_cams = scene["cameras"]["src_cam"]
     verts, colors, faces, bounds = scene["geometry"]
@@ -242,9 +248,10 @@ def make_video_grid_2x2(out_path, vid_paths, overwrite=False):
     if any(not os.path.isfile(v) for v in vid_paths):
         print("not all inputs exist!", vid_paths)
         return
-    
+
     # resize each input by half and then tile
     # so the output video is the same resolution
+    v1, v2, v3, v4 = vid_paths
     cmd = (
         f"ffmpeg -i {vid_paths[0]} -i {vid_paths[1]} -i {vid_paths[2]} -i {vid_paths[3]} "
         f"-filter_complex '[0:v]scale=iw/2:ih/2[v0];"
