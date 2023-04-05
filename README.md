@@ -94,6 +94,7 @@ Each output npz file will contain the SMPL parameters for all optimized people, 
 The `motion_chunks` output will contain additional predictions from the motion prior.
 Please see `run_vis.py` for how to extract the people meshes from the output parameters.
 
+
 ## Fitting to specific datasets:
 We provide configurations for dataset formats in `slahmr/confs/data`:
 1. Posetrack in `slahmr/confs/data/posetrack.yaml`
@@ -142,7 +143,6 @@ Then, run
 python run_eval.py -d <DSET_TYPE> -i <RES_ROOT> -f <JOB_FILE>
 ```
 where `<JOB_FILE>` is the same job file used to launch all optimization runs.
-
 
 In addition you can get an interactive visualization of the optimization procedure and the final output using [Rerun](https://github.com/rerun-io/rerun) with `python run_rerun_vis.py --log_root <LOG_DIR>`.
 
