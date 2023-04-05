@@ -5,7 +5,7 @@ pip install -e .
 # install ViTPose
 conda run -n slahmr5 --live-stream pip install -v -e third_party/PHALP_plus/ViTPose
 # install DROID-SLAM
-cd third_party/DROID-SLAM
+cd third-party/DROID-SLAM
 conda run -n slahmr5 --live-stream python setup.py install
 cd ../..
 
