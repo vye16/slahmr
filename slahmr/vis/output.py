@@ -253,7 +253,7 @@ def make_video_grid_2x2(out_path, vid_paths, overwrite=False):
     # so the output video is the same resolution
     v1, v2, v3, v4 = vid_paths
     cmd = (
-        f"ffmpeg -i {vid_paths[0]} -i {vid_paths[1]} -i {vid_paths[2]} -i {vid_paths[3]} "
+        f"ffmpeg -i {v1} -i {v2} -i {v3} -i {v4} "
         f"-filter_complex '[0:v]scale=iw/2:ih/2[v0];"
         f"[1:v]scale=iw/2:ih/2[v1];"
         f"[2:v]scale=iw/2:ih/2[v2];"
