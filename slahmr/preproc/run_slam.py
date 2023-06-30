@@ -173,7 +173,14 @@ def get_keyframe_map(video_dict):
     valid = video_dict["valid"]
     t = len(poses)
     c2w = SE3(poses).inv()
-    points = droid_backends.iproj(c2w.data, video_dict["disps"], video_dict["intrins"])
+
+    # `iproj` only has a cuda backend; if we pass in CPU tensors, it will silently
+    # return zeros
+    points = droid_backends.iproj(
+        c2w.data.cuda(),
+        video_dict["disps"].cuda(),
+        video_dict["intrins"].cuda(),
+    )
     valid_pts = torch.cat([points[i, valid[i]] for i in range(t)], dim=0)
     valid_rgb = torch.cat([images[i, valid[i]] for i in range(t)], dim=0)
     return (
