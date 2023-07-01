@@ -100,7 +100,8 @@ We provide configurations for dataset formats in `slahmr/confs/data`:
 1. Posetrack in `slahmr/confs/data/posetrack.yaml`
 2. Egobody in `slahmr/confs/data/egobody.yaml`
 3. 3DPW in `slahmr/confs/data/3dpw.yaml`
-4. Custom video in `slahmr/confs/data/video.yaml`
+4. DAVIS in `slahmr/confs/data/davis.yaml`
+5. Custom video in `slahmr/confs/data/video.yaml`
 
 **Please make sure to update all paths to data in the config files.**
 
@@ -143,6 +144,7 @@ python run_eval.py -d <DSET_TYPE> -i <RES_ROOT> -f <JOB_FILE>
 ```
 where `<JOB_FILE>` is the same job file used to launch all optimization runs.
 
+In addition you can get an interactive visualization of the optimization procedure and the final output using [Rerun](https://github.com/rerun-io/rerun) with `python run_rerun_vis.py --log_root <LOG_DIR>`.
 
 ## BibTeX
 

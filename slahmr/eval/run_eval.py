@@ -8,8 +8,8 @@ import pandas as pd
 import numpy as np
 import torch
 
-import egobody_utils as eb_util
-from tools import (
+import .egobody_utils as eb_util
+from .tools import (
     load_body_model,
     load_results_all,
     local_align_joints,
@@ -21,7 +21,7 @@ from tools import (
     EGOBODY_ROOT,
     TDPW_ROOT,
 )
-from associate import associate_phalp_track_dirs
+from .associate import associate_phalp_track_dirs
 
 
 def stack_torch(x_list, dim=0):

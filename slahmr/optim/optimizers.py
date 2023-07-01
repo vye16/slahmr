@@ -1,22 +1,21 @@
-import os
 import glob
-import numpy as np
-import matplotlib.pyplot as plt
+import os
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from body_model import OP_IGNORE_JOINTS
-from geometry.mesh import save_mesh_scenes
-from util.logger import Logger, log_cur_stats
-from util.tensor import move_to, detach_all
-from vis.output import prep_result_vis, animate_scene
+from slahmr.geometry.mesh import save_mesh_scenes
+from slahmr.body_model import OP_IGNORE_JOINTS
+from slahmr.util.logger import Logger, log_cur_stats
+from slahmr.util.tensor import detach_all, move_to
+from slahmr.vis.output import prep_result_vis, animate_scene
 
-from .losses import RootLoss, SMPLLoss, MotionLoss
+from .losses import MotionLoss, RootLoss, SMPLLoss
 from .output import save_camera_json
-
 
 LINE_SEARCH = "strong_wolfe"
 

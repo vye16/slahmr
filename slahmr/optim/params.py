@@ -1,14 +1,13 @@
 import numpy as np
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from body_model import SMPL_JOINTS
-from geometry.camera import invert_camera, compose_cameras
-from geometry.rotation import batch_rodrigues
-from util.logger import Logger
-from util.tensor import detach_all
+from slahmr.geometry.camera import compose_cameras, invert_camera
+from slahmr.geometry.rotation import batch_rodrigues
+from slahmr.body_model import SMPL_JOINTS
+from slahmr.util.logger import Logger
+from slahmr.util.tensor import detach_all
 
 J_BODY = len(SMPL_JOINTS) - 1  # no root
 

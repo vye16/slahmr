@@ -1,22 +1,17 @@
-import os
 import math
-import numpy as np
+import os
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.distributions import (
-    MixtureSameFamily,
-    Categorical,
-    Normal,
-    MultivariateNormal,
-)
+from torch.distributions import (Categorical, MixtureSameFamily,
+                                 MultivariateNormal, Normal)
 
-from body_model import SMPL_JOINTS, SMPL_PARENTS, OP_NUM_JOINTS
-from geometry.rotation import rotation_matrix_to_angle_axis
-from geometry import camera as cam_util
-from util.logger import Logger
-
+from slahmr.geometry import camera as cam_util
+from slahmr.geometry.rotation import rotation_matrix_to_angle_axis
+from slahmr.body_model import OP_NUM_JOINTS, SMPL_JOINTS, SMPL_PARENTS
+from slahmr.util.logger import Logger
 
 CONTACT_HEIGHT_THRESH = 0.08
 

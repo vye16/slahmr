@@ -10,7 +10,7 @@ from omegaconf import OmegaConf
 import numpy as np
 import torch
 
-from body_model import BodyModel
+from slahmr.body_model import BodyModel
 
 
 ROOT_DIR = os.path.abspath(f"{__file__}/../../../")

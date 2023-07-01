@@ -1,25 +1,27 @@
 import os
-import glob
 
 import imageio
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
-from data import get_dataset_from_cfg, expand_source_paths
-from optim.output import (
+from slahmr.data import get_dataset_from_cfg, expand_source_paths
+from slahmr.optim.output import (
     get_results_paths,
     load_result,
     save_input_frames,
-    save_input_poses,
 )
-from util.loaders import load_config_from_log, resolve_cfg_paths, load_smpl_body_model
-from util.tensor import get_device, move_to, detach_all, to_torch
-from vis.output import prep_result_vis, animate_scene, make_video_grid_2x2
-from vis.tools import vis_keypoints
-from vis.viewer import init_viewer
+from slahmr.util.loaders import load_config_from_log, resolve_cfg_paths, load_smpl_body_model
+from slahmr.util.tensor import get_device, move_to, to_torch
+from slahmr.vis.output import (
+    prep_result_vis,
+    animate_scene,
+    make_video_grid_2x2,
+)
+from slahmr.vis.tools import vis_keypoints
+from slahmr.vis.viewer import init_viewer
 
 
 def run_vis(
@@ -218,11 +220,14 @@ def launch_vis(i, args):
     dev_id = args.gpus[i % len(args.gpus)]
     os.environ["EGL_DEVICE_ID"] = str(dev_id)
     os.environ["PYOPENGL_PLATFORM"] = "egl"
+    path_name = log_dir.split(args.log_root)[-1].strip("/")
+    exp_name = "-".join(path_name.split("/")[:2])
 
     if args.save_root is not None:
-        path_name = log_dir.split(args.log_root)[-1].strip("/")
-        exp_name = "-".join(path_name.split("/")[:2])
         save_dir = f"{args.save_root}/{exp_name}"
+        os.makedirs(save_dir, exist_ok=True)
+    else:
+        save_dir = log_dir
         os.makedirs(save_dir, exist_ok=True)
 
     visualize_log(

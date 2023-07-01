@@ -13,7 +13,7 @@ from pyrender.constants import RenderFlags
 from pyrender.light import DirectionalLight
 from pyrender.node import Node
 
-from geometry.camera import make_rotation, make_translation
+from slahmr.geometry.camera import make_rotation, make_translation
 from .tools import (
     read_image,
     checkerboard_geometry,

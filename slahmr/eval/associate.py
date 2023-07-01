@@ -5,7 +5,7 @@ import joblib
 import numpy as np
 import torch
 
-from data.tools import read_keypoints
+from slahmr.data.tools import read_keypoints
 
 
 def associate_phalp_track_dirs(

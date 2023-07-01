@@ -1,23 +1,18 @@
 import os
-import numpy as np
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from body_model import SMPL_JOINTS, KEYPT_VERTS, smpl_to_openpose
-from geometry.rotation import batch_rodrigues, rotation_matrix_to_angle_axis
-from util.logger import Logger
-from util.tensor import (
-    detach_all,
-    scatter_intervals,
-    select_intervals,
-    get_scatter_mask,
-)
+from slahmr.geometry.rotation import batch_rodrigues, rotation_matrix_to_angle_axis
+from slahmr.body_model import KEYPT_VERTS, SMPL_JOINTS, smpl_to_openpose
+from slahmr.util.logger import Logger
+from slahmr.util.tensor import (detach_all, get_scatter_mask, scatter_intervals,
+                         select_intervals)
 
 from .base_scene import BaseSceneModel
 from .helpers import compute_world2prior, estimate_floor_planes
-
 
 J_BODY = len(SMPL_JOINTS) - 1  # no root
 CONTACT_ORDERING = [

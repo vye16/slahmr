@@ -5,10 +5,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from body_model import SMPL_JOINTS, KEYPT_VERTS, smpl_to_openpose, run_smpl
-from geometry.rotation import rotation_matrix_to_angle_axis
-from util.logger import Logger
-from util.tensor import move_to, detach_all
+from slahmr.body_model import SMPL_JOINTS, KEYPT_VERTS, smpl_to_openpose, run_smpl
+from slahmr.geometry.rotation import rotation_matrix_to_angle_axis
+from slahmr.util.logger import Logger
+from slahmr.util.tensor import move_to, detach_all
 
 from .helpers import estimate_initial_trans
 from .params import CameraParams

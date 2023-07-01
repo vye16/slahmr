@@ -2,8 +2,7 @@
 Taken from https://github.com/davrempe/humor
 """
 
-from body_model.utils import SMPL_JOINTS
-
+from slahmr.body_model.utils import SMPL_JOINTS
 
 TRAIN_DATASETS = [
     "CMU",
