@@ -43,7 +43,7 @@ This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU.
 
     * Install ViTPose
         ```
-        pip install -v -e third-party/PHALP_plus/ViTPose
+        pip install -v -e third-party/ViTPose
         ```
 
     * Install DROID-SLAM (will take a while)

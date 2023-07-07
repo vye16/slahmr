@@ -1,5 +1,3 @@
-git+https://github.com/facebookresearch/detectron2.git
-git+https://github.com/brjathu/pytube.git
 git+https://github.com/nghorbani/configer
 setuptools==59.5.0
 torchgeometry==0.1.2
@@ -13,7 +11,6 @@ matplotlib
 opencv-python
 scipy
 scikit-image
-scikit-learn==0.22
 joblib
 cython
 tqdm
@@ -23,9 +20,8 @@ chumpy
 gdown
 dill
 motmetrics
-scenedetect[opencv]
 einops
 mmcv==1.3.9
 timm==0.4.9
-xtcocotools==1.10
+xtcocotools
 pandas==1.4.0
