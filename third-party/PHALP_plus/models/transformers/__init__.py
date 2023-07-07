@@ -1,1 +1,0 @@
-from .relational_model import RelationTransformerModel
