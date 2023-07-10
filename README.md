@@ -6,7 +6,12 @@ Official PyTorch implementation of the paper Decoupling Human and Camera Motion 
 
 <img src="./teaser.png">
 
-##  [<img src="https://i.imgur.com/QCojoJk.png" width="40"> You can run SLAHMR in Google Colab](https://colab.research.google.com/drive/1IFvek5DSgKb80vtSvXAXh1xmBFMJuxeL?usp=sharing)
+##  [<img src="https://i.imgur.com/QCojoJk.png" width="40"> You can run SLAHMR in Google Colab](https://colab.research.google.com/drive/1knzxW3XuxiaBH6hcwx01cs6DfA4azv5E?usp=sharing)
+
+## News
+
+- [2023/07] We updated the code to support tracking from [4D Humans](https://shubham-goel.github.io/4dhumans/)! The original code remains in the `release` branch.
+- [2023/02] Original release!
 
 ## Getting started
 This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU.
