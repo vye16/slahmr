@@ -17,41 +17,19 @@ def launch_phalp(gpus, seq, img_dir, res_dir, overwrite=False):
     worker_id = cur_proc._identity[0] - 1 if len(cur_proc._identity) > 0 else 0
     gpu = gpus[worker_id % len(gpus)]
 
-    PHALP_DIR = os.path.abspath(f"{__file__}/../../../third-party/PHALP_plus")
+    PHALP_DIR = os.path.abspath(f"{__file__}/../")
     print("PHALP DIR", PHALP_DIR)
 
     base_path, sample = img_dir.split(seq)[:2]
     cmd_args = [
         f"cd {PHALP_DIR};",
         f"CUDA_VISIBLE_DEVICES={gpu}",
-        "python run_phalp.py",
-        f"--base_path {base_path}",
-        f"--video_seq {seq}",
-        f"--sample '{sample}'",
-        f"--storage_folder {res_dir}",
-        "--track_dataset posetrack-val",
-        "--predict TPL",
-        "--distance_type EQ_010",
-        "--encode_type 4c",
-        "--detect_shots True",
-        "--track_history 7",
-        "--past_lookback 1",
-        "--max_age_track 50",
-        "--n_init 5",
-        "--low_th_c 0.8",
-        "--alpha 0.1",
-        "--hungarian_th 100",
-        "--render_type HUMAN_FULL_FAST",
-        "--render True",
-        "--store_mask True",
-        "--res 256",
-        "--render_up_scale 2",
-        "--verbose False",
-        f"--overwrite {overwrite}",
-        "--use_gt False",
-        "--batch_id -1",
-        "--detection_type mask_vitdet",
-        "--start_frame -1",
+        "python track.py",
+        f"video.source={img_dir}",
+        f"video.output_dir={res_dir}",
+        f"overwrite={overwrite}",
+        "detect_shots=True",
+        "video.extract_video=False",
     ]
 
     cmd = " ".join(cmd_args)
@@ -74,6 +52,7 @@ def process_seq(
     res_path = f"{res_dir}/results/{seq}.pkl"
     if overwrite or not os.path.isfile(res_path):
         res = launch_phalp(gpus, seq, img_dir, res_dir, overwrite)
+        os.rename(f"{res_dir}/results/demo_{seq}.pkl", res_path)
         assert res == 0, "PHALP FAILED"
 
     # export the PHALP predictions

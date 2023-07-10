@@ -18,7 +18,7 @@ def export_phalp_predictions(data_dir, seq, phalp_out, pred_out):
 
     tracklet_data = joblib.load(res_file)
     for frame, track_data in tracklet_data.items():
-        name = os.path.splitext(frame)[0]
+        name = os.path.splitext(frame.split('/')[-1])[0]
         track_dicts = unpack_frame(track_data)
         for tid, pred_dict in track_dicts.items():
             track_dir = os.path.join(pred_dir, f"{tid:03d}")
@@ -39,11 +39,11 @@ def export_vitpose_keypoints(data_dir, seq, phalp_out, kp_out):
 
     tracklet_data = joblib.load(res_file)
     for frame, track_data in tracklet_data.items():
-        name = os.path.splitext(frame)[0]
+        name = os.path.splitext(frame.split('/')[-1])[0]
         tids = track_data["tid"]
         valid_tids = track_data["tracked_ids"]
-        kps_all = track_data["vitpose"]
-        mask_paths = track_data["mask_name"]
+        kps_all = track_data["extra_data"]
+        #mask_paths = track_data["mask_name"]
         for i, tid in enumerate(tids):
             if tid not in valid_tids:
                 continue
@@ -54,7 +54,7 @@ def export_vitpose_keypoints(data_dir, seq, phalp_out, kp_out):
                 "people": [
                     {
                         "pose_keypoints_2d": kps_all[i].tolist(),
-                        "mask_path": mask_paths[i],
+                        #"mask_path": mask_paths[i],
                     }
                 ],
             }
@@ -77,7 +77,7 @@ def export_shot_changes(data_dir, seq, phalp_out, out_name):
     frames = sorted(tracklet_data.keys())
     shots = np.cumsum([tracklet_data[frame]["shot"] for frame in frames])
     shots = shots.astype(int).tolist()
-    shot_dict = {frame: shot for frame, shot in zip(frames, shots)}
+    shot_dict = {frame.split('/')[-1]: shot for frame, shot in zip(frames, shots)}
     with open(out_path, "w") as f:
         json.dump(shot_dict, f, indent=1)
 
@@ -93,7 +93,7 @@ def unpack_frame(track_data):
     for i, tid in enumerate(track_data["tid"]):
         if tid not in track_data["tracked_ids"]:
             continue
-        cam = track_data["camera"][i].squeeze()  # (3,)
+        cam = track_data["camera_bbox"][i].squeeze()  # (3,)
         H, W = track_data["size"][i]
         focal = 0.5 * (H + W)
 

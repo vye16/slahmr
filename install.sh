@@ -3,7 +3,7 @@ set -e
 
 export CONDA_ENV_NAME=slahmr
 
-conda create -n $CONDA_ENV_NAME python=3.9 -y
+conda create -n $CONDA_ENV_NAME python=3.10 -y
 
 conda activate $CONDA_ENV_NAME
 
@@ -17,6 +17,9 @@ pip install torch-scatter -f https://data.pyg.org/whl/torch-1.13.0+cu117.html
 # uncomment if pip installation isn't working
 # conda install pytorch-scatter -c pyg -y
 
+# install PHALP
+pip install phalp[all]@git+https://github.com/brjathu/PHALP.git
+
 # install remaining requirements
 pip install -r requirements.txt
 
@@ -24,7 +27,7 @@ pip install -r requirements.txt
 pip install -e .
 
 # install ViTPose
-pip install -v -e third-party/PHALP_plus/ViTPose
+pip install -v -e third-party/ViTPose
 
 # install DROID-SLAM
 cd third-party/DROID-SLAM
