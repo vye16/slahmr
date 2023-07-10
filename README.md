@@ -41,6 +41,11 @@ This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU.
         We use PyTorch 1.13.0 with CUDA 11.7. Please modify according to your setup; we've tested successfully for PyTorch 1.11 as well.
         We've also included `env_build.yaml` to speed up installation using already-solved dependencies, though it might not be compatible with your CUDA driver.
 
+    * Install PHALP
+        ```
+        pip install phalp[all]@git+https://github.com/brjathu/PHALP.git
+        ```
+
     * Install current source repo
         ```
         pip install -e .
