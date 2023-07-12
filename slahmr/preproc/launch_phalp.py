@@ -3,7 +3,7 @@ import subprocess
 import multiprocessing as mp
 from concurrent import futures
 
-from preproc.datasets import update_args, get_img_dir
+from preproc.datasets import update_args
 from preproc.export_phalp import export_sequence_results
 
 
@@ -20,7 +20,6 @@ def launch_phalp(gpus, seq, img_dir, res_dir, overwrite=False):
     PHALP_DIR = os.path.abspath(f"{__file__}/../")
     print("PHALP DIR", PHALP_DIR)
 
-    base_path, sample = img_dir.split(seq)[:2]
     cmd_args = [
         f"cd {PHALP_DIR};",
         f"CUDA_VISIBLE_DEVICES={gpu}",
@@ -67,6 +66,18 @@ def process_seq(
     return 0
 
 
+def get_out_dir(src_root, src_dir, src_token, out_token):
+    """
+    :param src_root (str) root of all data
+    :param src_dir (str) img input dir
+    :param src_token (str) parent name of image input dir
+    :param out_token (str) name of output dir
+    """
+    src_suffix = src_dir.removeprefix(src_root)
+    out_dir = f"{out_root}/{src_suffix}"
+    return out_dir.replace(src_token, out_token)
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -74,6 +85,9 @@ if __name__ == "__main__":
     parser.add_argument("--type", default="posetrack", help="dataset to process")
     parser.add_argument("--root", default=None, help="root dir of data, default None")
     parser.add_argument("--split", default="val", help="split of dataset, default val")
+    parser.add_argument(
+        "--img_name", default=None, help="input image directory name, default None"
+    )
     parser.add_argument(
         "--out_name", default="phalp_out", help="output name, default phalp_out"
     )
@@ -84,12 +98,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args = update_args(args)
 
-    print(f"running phalp on {len(args.seqs)} sequences")
+    print(f"running phalp on {len(args.img_dirs)} image directories")
     if len(args.gpus) > 1:
         with futures.ProcessPoolExecutor(max_workers=len(args.gpus)) as exe:
-            for seq in args.seqs:
-                img_dir = get_img_dir(args.type, args.root, seq, args.split)
-                res_dir = f"{args.root}/slahmr/{args.out_name}"
+            for img_dir, seq in zip(args.img_dirs, args.seqs):
+                res_dir = f"{args.root}/{args.out_name}/{seq}"
                 exe.submit(
                     process_seq,
                     args.gpus,
@@ -99,7 +112,6 @@ if __name__ == "__main__":
                     overwrite=args.overwrite,
                 )
     else:
-        for seq in args.seqs:
-            img_dir = get_img_dir(args.type, args.root, seq, args.split)
-            res_dir = f"{args.root}/slahmr/{args.out_name}"
+        for img_dir, seq in zip(args.img_dirs, args.seqs):
+            res_dir = f"{args.root}/{args.out_name}/{seq}"
             process_seq(args.gpus, seq, img_dir, res_dir, overwrite=args.overwrite)
