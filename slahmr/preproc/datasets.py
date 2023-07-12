@@ -2,14 +2,17 @@ import os
 import glob
 import pandas as pd
 from copy import deepcopy
+import warnings
 
 
 def update_args(args):
     args = deepcopy(args)
     if args.type == "egobody":
         if args.root is None:
-            #             args.root = "/path/to/egobody"
-            args.root = "/shared/pavlakos/datasets/egobody"
+            warnings.warn(
+                "args.root flag is set to None, using root directory in source"
+            )
+            args.root = "/path/to/egobody"
         if args.seqs is None:
             args.seqs = get_egobody_seqs(args.root, args.split)
         args.img_dirs = [
@@ -20,8 +23,10 @@ def update_args(args):
 
     if args.type == "3dpw":
         if args.root is None:
-            #             args.root = "/path/to/3DPW"
-            args.root = "/shared/pavlakos/datasets/3DPW"
+            warnings.warn(
+                "args.root flag is set to None, using root directory in source"
+            )
+            args.root = "/path/to/3DPW"
         if args.split == "val":
             args.split = "validation"
         if args.seqs is None:
@@ -30,16 +35,18 @@ def update_args(args):
 
     elif args.type == "posetrack":
         if args.root is None:
-            #             args.root = "/path/to/posetrack/posetrack2018/posetrack_data"
-            args.root = (
-                "/shared/pavlakos/datasets/posetrack/posetrack2018/posetrack_data"
+            warnings.warn(
+                "args.root flag is set to None, using root directory in source"
             )
+            args.root = "/path/to/posetrack/posetrack2018/posetrack_data"
         args.img_name = f"images/{args.split}"
 
     elif args.type == "davis":
         if args.root is None:
-            #             args.root = "/path/to/DAVIS"
-            args.root = "/shared/vye/datasets/DAVIS"
+            warnings.warn(
+                "args.root flag is set to None, using root directory in source"
+            )
+            args.root = "/path/to/DAVIS"
         args.img_name = "JPEGImages/Full-Resolution"
 
     else:
