@@ -9,7 +9,7 @@ import multiprocessing as mp
 
 from preproc import export_3dpw
 from preproc import export_egobody
-from preproc.datasets import update_args, get_img_dir
+from preproc.datasets import update_args
 
 
 SRC_DIR = os.path.abspath(f"{__file__}/../")
@@ -66,8 +66,7 @@ def split_frames_shots(img_dir, shot_path, pad_shot=0, min_len=0):
     return subseqs, np.unique(shot_idcs)
 
 
-def split_sequence(args, seq):
-    img_dir = get_img_dir(args.type, args.root, seq, args.split)
+def split_sequence(args, img_dir, seq):
     if args.type == "posetrack":  # split posetrack by shot changes
         shot_path = f"{args.root}/slahmr/{args.split}/shot_idcs/{seq}.json"
         subseqs, idcs = split_frames_shots(img_dir, shot_path)
@@ -132,13 +131,13 @@ def get_command(img_dir, out_dir, start=0, end=-1, intrins_path=None, overwrite=
     return cmd
 
 
-def check_intrins(data_type, data_root, intrins_path, seq, split):
+def check_intrins(data_type, data_root, intrins_path, img_dir):
     assert intrins_path is not None
     out_name = intrins_path.split(data_root)[1].strip("/").split("/")[0]
     out_root = f"{data_root}/{out_name}"
     if "egobody" in data_type:
         if not os.path.isfile(intrins_path):
-            img_root = os.path.dirname(get_img_dir(data_type, data_root, seq, split))
+            img_root = os.path.dirname(img_dir)
             intrins_path = export_egobody.export_seq(img_root, out_root)[0]
         return intrins_path
     if "3dpw" in data_type:
@@ -147,14 +146,13 @@ def check_intrins(data_type, data_root, intrins_path, seq, split):
     return intrins_path
 
 
-def get_slam_command(args, seq, shot_idx=None, start=0, end=-1):
-    img_dir = get_img_dir(args.type, args.root, seq, args.split)
+def get_slam_command(args, img_dir, seq, shot_idx=None, start=0, end=-1):
     out_dir = get_out_dir(args, seq, shot_idx, start, end)
     intrins_path = None
     if args.use_intrins:
         intrins_path = get_intrins_path(args.type, args.root, seq)
         if intrins_path is not None:
-            intrins_path = check_intrins(args.type, args.root, intrins_path, seq, args.split)
+            intrins_path = check_intrins(args.type, args.root, intrins_path, img_dir)
     return get_command(
         img_dir,
         out_dir,
@@ -179,7 +177,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--type", default="egobody", help="dataset to process")
+    parser.add_argument("--type", default="posetrack", help="dataset to process")
     parser.add_argument(
         "--root", default=None, help="root of data to process, default None"
     )
@@ -198,8 +196,9 @@ if __name__ == "__main__":
 
     print(f"Running SLAM on {len(args.seqs)} sequences")
     with futures.ProcessPoolExecutor(max_workers=len(args.gpus)) as ex:
-        for seq in args.seqs[:1]:
-            subseqs, idcs = split_sequence(args, seq)
-            for idcs, (start, end) in zip(idcs, subseqs):
-                cmd = get_slam_command(args, seq, start, end)
+        for img_dir, seq in zip(args.img_dirs, args.seqs):
+            subseqs, shot_idcs = split_sequence(args, img_dir, seq)
+            for shot, (start, end) in zip(shot_idcs, subseqs):
+                cmd = get_slam_command(args, img_dir, seq, shot, start, end)
+                print(cmd)
                 ex.submit(launch_job, args.gpus, cmd)
