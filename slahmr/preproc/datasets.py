@@ -48,10 +48,12 @@ def update_args(args):
             )
             args.root = "/path/to/DAVIS"
         args.img_name = "JPEGImages/Full-Resolution"
+        args.split = ""
 
     else:
         assert args.root is not None
         args.img_name = args.img_name if args.img_name is not None else "images"
+        args.split = ""
 
     args.img_dirs, args.seqs = get_all_img_dirs(
         f"{args.root}/{args.img_name}", args.seqs
@@ -80,6 +82,7 @@ def get_all_img_dirs(data_root, seqs=None):
             name = get_name(root)
             if len(seqs) == 0 or name in seqs:
                 img_dirs.append(root)
+    img_dirs = sorted(img_dirs)
     seqs = [get_name(d) for d in img_dirs]
     return img_dirs, seqs
 

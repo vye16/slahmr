@@ -29,6 +29,7 @@ def launch_phalp(gpus, seq, img_dir, res_dir, overwrite=False):
         f"overwrite={overwrite}",
         "detect_shots=True",
         "video.extract_video=False",
+        "render.enable=False",
     ]
 
     cmd = " ".join(cmd_args)
@@ -38,9 +39,10 @@ def launch_phalp(gpus, seq, img_dir, res_dir, overwrite=False):
 
 def process_seq(
     gpus,
+    out_root,
     seq,
     img_dir,
-    res_dir,
+    out_name="phalp_out",
     track_name="track_preds",
     shot_name="shot_idcs",
     overwrite=False,
@@ -48,21 +50,21 @@ def process_seq(
     """
     Run and export PHALP results
     """
-    res_path = f"{res_dir}/results/{seq}.pkl"
+    name = os.path.basename(seq)
+    res_root = f"{out_root}/{out_name}/{seq}"
+    os.makedirs(res_root, exist_ok=True)
+    res_dir = os.path.join(res_root, "results")
+    res_path = f"{res_root}/{name}.pkl"
     if overwrite or not os.path.isfile(res_path):
-        res = launch_phalp(gpus, seq, img_dir, res_dir, overwrite)
-        os.rename(f"{res_dir}/results/demo_{seq}.pkl", res_path)
+        res = launch_phalp(gpus, seq, img_dir, res_root, overwrite)
+        os.rename(f"{res_dir}/demo_{name}.pkl", res_path)
         assert res == 0, "PHALP FAILED"
 
     # export the PHALP predictions
-    out_root, out_name = os.path.split(res_dir)
-    export_sequence_results(
-        out_root,
-        seq,
-        res_name=f"{out_name}/results",
-        track_name=track_name,
-        shot_name=shot_name,
-    )
+    track_dir = f"{out_root}/{track_name}/{seq}"
+    shot_path = f"{out_root}/{shot_name}/{seq}.json"
+
+    export_sequence_results(res_path, track_dir, shot_path)
     return 0
 
 
@@ -88,9 +90,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--img_name", default=None, help="input image directory name, default None"
     )
-    parser.add_argument(
-        "--out_name", default="phalp_out", help="output name, default phalp_out"
-    )
     parser.add_argument("--seqs", nargs="*", default=None)
     parser.add_argument("--gpus", nargs="*", default=[0])
     parser.add_argument("-y", "--overwrite", action="store_true")
@@ -98,20 +97,20 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args = update_args(args)
 
+    out_root = f"{args.root}/slahmr/{args.split}"
+
     print(f"running phalp on {len(args.img_dirs)} image directories")
     if len(args.gpus) > 1:
         with futures.ProcessPoolExecutor(max_workers=len(args.gpus)) as exe:
             for img_dir, seq in zip(args.img_dirs, args.seqs):
-                res_dir = f"{args.root}/{args.out_name}/{seq}"
                 exe.submit(
                     process_seq,
                     args.gpus,
+                    out_root,
                     seq,
                     img_dir,
-                    res_dir,
                     overwrite=args.overwrite,
                 )
     else:
         for img_dir, seq in zip(args.img_dirs, args.seqs):
-            res_dir = f"{args.root}/{args.out_name}/{seq}"
-            process_seq(args.gpus, seq, img_dir, res_dir, overwrite=args.overwrite)
+            process_seq(args.gpus, out_root, seq, img_dir, overwrite=args.overwrite)
