@@ -87,7 +87,7 @@ def get_out_dir(args, seq, shot_idx=None, start=0, end=-1):
     if args.seq_len > 0:
         out_name = f"{out_name}_split"
 
-    out_dir = f"{args.root}/slahmr/{out_name}/{seq}"
+    out_dir = f"{args.root}/slahmr/{args.split}/{out_name}/{seq}"
 
     if args.seq_len > 0:
         return f"{out_dir}/{start}-{end}"
