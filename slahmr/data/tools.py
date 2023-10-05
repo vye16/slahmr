@@ -13,7 +13,7 @@ def read_keypoints(keypoint_fn):
     """
     Only reads body keypoint data of first person.
     """
-    empty_kps = np.zeros((OP_NUM_JOINTS, 3), dtype=np.float)
+    empty_kps = np.zeros((OP_NUM_JOINTS, 3), dtype=np.float32)
     if not os.path.isfile(keypoint_fn):
         return empty_kps
 
@@ -25,7 +25,7 @@ def read_keypoints(keypoint_fn):
         return empty_kps
 
     person_data = data["people"][0]
-    body_keypoints = np.array(person_data["pose_keypoints_2d"], dtype=np.float)
+    body_keypoints = np.array(person_data["pose_keypoints_2d"], dtype=np.float32)
     body_keypoints = body_keypoints.reshape([-1, 3])
     return body_keypoints
 

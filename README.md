@@ -9,40 +9,49 @@ Official PyTorch implementation of the paper Decoupling Human and Camera Motion 
 <img src="./teaser.png">
 
 ## Getting started
-This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU
+This code was tested on Ubuntu 20.04 LTS and requires a CUDA-capable GPU
 
 1. Clone repository and submodules
 ```
-git clone --recursive https://github.com/vye16/slahmr.git
+git clone --recursive https://github.com/rerun-io/slahmr.git
 ```
 or initialize submodules if already cloned
 ```
 git submodule update --init --recursive
 ```
 
-2. Set up conda environment (note that creating the environment can take a while, especially the pip installation step has no feedback and can look like its stuck)
+2. (virtualenv + pip) Make sure `nvcc` is available (11.7 assumed and tested here, feel free to try other versions). Create a virtualenv and install dependencies. 
+```
+python3 -m venv env
+source env/bin/activate
+pip install torch==2.0.1 torchvision==0.15.2 # need to manually beforehand, because pytorch3d doesn't specify install dependencies properly
+pip install -r requirements.txt
+```
+Note, that this will build pytorch3d and detectron2 from source which will take a while.
+
+2. (Conda) Set up conda environment (note that creating the environment can take a while, especially the pip installation step has no feedback and can look like its stuck)
 ```
 conda env create -f env.yaml
 conda activate slahmr
 ```
 
-Install current source repo
+3. Install current source repo
 ```
 pip install -e .
 ```
 
-Install ViTPose
+4. Install ViTPose
 ```
 pip install -v -e third_party/PHALP_plus/ViTPose
 ```
 
-and DROID-SLAM (will take a while)
+5. Install  DROID-SLAM (will take a while)
 ```
 cd third_party/DROID-SLAM
 python setup.py install
 ```
 
-3. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing).
+6. Download models from [here](https://drive.google.com/file/d/1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW/view?usp=sharing).
 ```
 gdown https://drive.google.com/uc?id=1GXAd-45GzGYNENKgQxFQ4PHrBp8wDRlW
 unzip -q slahmr_dependencies.zip
@@ -81,7 +90,7 @@ Make sure all checkpoints have been unpacked `_DATA`.
 We use hydra to launch experiments, and all parameters can be found in `slahmr/confs/config.yaml`.
 If you would like to update any aspect of logging or optimization tuning, update the relevant config files.
 
-From the `slahmr` directory,
+From the `slahmr` directory (replace `<DATA_CFG>` with the dataset config name, e.g., `davis`),
 ```
 python run_opt.py data=<DATA_CFG> run_opt=True run_vis=True
 ```
