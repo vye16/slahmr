@@ -88,18 +88,15 @@ class BaseSceneModel(nn.Module):
 
         # initialize body params
         B, T = self.batch_size, self.seq_len
-        init_pose = torch.zeros(B, T, self.latent_pose_dim)
-        init_betas = torch.zeros(B, self.num_betas)
-        init_trans = torch.zeros(B, T, 3)
-        init_rot = (
-            torch.tensor([np.pi, 0, 0], dtype=torch.float32)
-            .reshape(1, 1, 3)
-            .repeat(B, T, 1)
-        )
+        device = next(iter(cam_data.values())).device
+        init_betas = torch.zeros(B, self.num_betas, device=device)
 
         if self.use_init and "init_body_pose" in obs_data:
             init_pose = obs_data["init_body_pose"][:, :, :J_BODY, :]
-            init_pose = self.pose2latent(init_pose)
+            init_pose_latent = self.pose2latent(init_pose)
+        else:
+            init_pose = torch.zeros(B, T, J_BODY, 3, device=device)
+            init_pose_latent = torch.zeros(B, T, self.latent_pose_dim, device=device)
 
         # transform into world frame (T, 3, 3), (T, 3)
         R_w2c, t_w2c = cam_data["cam_R"], cam_data["cam_t"]
@@ -111,13 +108,18 @@ class BaseSceneModel(nn.Module):
             init_rot_mat = angle_axis_to_rotation_matrix(init_rot)
             init_rot_mat = torch.einsum("tij,btjk->btik", R_c2w, init_rot_mat)
             init_rot = rotation_matrix_to_angle_axis(init_rot_mat)
+        else:
+            init_rot = (
+                torch.tensor([np.pi, 0, 0], dtype=torch.float32)
+                .reshape(1, 1, 3)
+                .repeat(B, T, 1)
+            )
 
-        body_pose = self.latent2pose(init_pose)
-        pred_data = self.pred_smpl(init_trans, init_rot, body_pose, init_betas)
         if self.use_init and "init_trans" in obs_data:
             # must offset by the root location before applying camera to world transform
-            root_loc = pred_data["joints3d_body"][..., 0, :]  # (B, T, 3)
             init_trans = obs_data["init_trans"]  # (B, T, 3)
+            pred_data = self.pred_smpl(init_trans, init_rot, init_pose, init_betas)
+            root_loc = pred_data["joints3d"][..., 0, :]  # (B, T, 3)
             init_trans = (
                 torch.einsum("tij,btj->bti", R_c2w, init_trans - root_loc)
                 + t_c2w[None]
@@ -125,14 +127,16 @@ class BaseSceneModel(nn.Module):
             )
         else:
             # initialize trans with reprojected joints
+            init_trans = torch.zeros(B, T, 3, device=device)
+            pred_data = self.pred_smpl(init_trans, init_rot, init_pose, init_betas)
             init_trans = estimate_initial_trans(
-                body_pose,
+                init_pose,
                 pred_data["joints3d_op"],
                 obs_data["joints2d"],
                 obs_data["intrins"][:, 0],
             )
 
-        self.params.set_param("latent_pose", init_pose)
+        self.params.set_param("latent_pose", init_pose_latent)
         self.params.set_param("betas", init_betas)
         self.params.set_param("trans", init_trans)
         self.params.set_param("root_orient", init_rot)
