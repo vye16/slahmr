@@ -6,7 +6,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from body_model import SMPL_JOINTS, KEYPT_VERTS, smpl_to_openpose, run_smpl
-from geometry.rotation import rotation_matrix_to_angle_axis
+from geometry.rotation import (
+    rotation_matrix_to_angle_axis,
+    angle_axis_to_rotation_matrix,
+)
 from util.logger import Logger
 from util.tensor import move_to, detach_all
 
@@ -98,15 +101,19 @@ class BaseSceneModel(nn.Module):
             init_pose = obs_data["init_body_pose"][:, :, :J_BODY, :]
             init_pose = self.pose2latent(init_pose)
 
+        # transform into world frame (T, 3, 3), (T, 3)
+        R_w2c, t_w2c = cam_data["cam_R"], cam_data["cam_t"]
+        R_c2w = R_w2c.transpose(-1, -2)
+        t_c2w = -torch.einsum("tij,tj->ti", R_c2w, t_w2c)
+
         if self.use_init and "init_root_orient" in obs_data:
-            init_rot = obs_data["init_root_orient"]
+            init_rot = obs_data["init_root_orient"]  # (B, T, 3)
+            init_rot_mat = angle_axis_to_rotation_matrix(init_rot)
+            init_rot_mat = torch.einsum("tij,btjk->btik", R_c2w, init_rot_mat)
+            init_rot = rotation_matrix_to_angle_axis(init_rot_mat)
 
         if self.use_init and "init_trans" in obs_data:
             init_trans = obs_data["init_trans"]  # (B, T, 3)
-            # transform into world frame (T, 3, 3), (T, 3)
-            R_w2c, t_w2c = cam_data["cam_R"], cam_data["cam_t"]
-            R_c2w = R_w2c.transpose(-1, -2)
-            t_c2w = -torch.einsum("tij,tj->ti", R_c2w, t_w2c)
             init_trans = torch.einsum("tij,btj->bti", R_c2w, init_trans) + t_c2w[None]
         else:
             # initialize trans with reprojected joints

@@ -131,6 +131,15 @@ def quaternion_to_angle_axis(quaternion):
     return angle_axis
 
 
+def angle_axis_to_rotation_matrix(angle_axis):
+    """
+    :param angle_axis (*, 3)
+    return (*, 3, 3)
+    """
+    quat = angle_axis_to_quaternion(angle_axis)
+    return quaternion_to_rotation_matrix(quat)
+
+
 def quaternion_to_rotation_matrix(quaternion):
     """
     Convert a quaternion to a rotation matrix.
