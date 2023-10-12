@@ -115,19 +115,19 @@ class BaseSceneModel(nn.Module):
                 .repeat(B, T, 1)
             )
 
+        init_trans = torch.zeros(B, T, 3, device=device)
         if self.use_init and "init_trans" in obs_data:
             # must offset by the root location before applying camera to world transform
-            init_trans = obs_data["init_trans"]  # (B, T, 3)
             pred_data = self.pred_smpl(init_trans, init_rot, init_pose, init_betas)
             root_loc = pred_data["joints3d"][..., 0, :]  # (B, T, 3)
+            init_trans = obs_data["init_trans"]  # (B, T, 3)
             init_trans = (
-                torch.einsum("tij,btj->bti", R_c2w, init_trans - root_loc)
+                torch.einsum("tij,btj->bti", R_c2w, init_trans + root_loc)
                 + t_c2w[None]
-                + root_loc
+                - root_loc
             )
         else:
             # initialize trans with reprojected joints
-            init_trans = torch.zeros(B, T, 3, device=device)
             pred_data = self.pred_smpl(init_trans, init_rot, init_pose, init_betas)
             init_trans = estimate_initial_trans(
                 init_pose,
