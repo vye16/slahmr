@@ -39,7 +39,7 @@ def preprocess_tracks(img_dir, track_dir, shot_dir, overwrite=False):
 
     phalp.process_seq(
         [gpu],
-        f"{res_root}/phalp_out",
+        res_root,
         seq,
         img_dir,
         track_name=track_name,
