@@ -27,7 +27,12 @@ This code was tested on Ubuntu 22.04 LTS and requires a CUDA-capable GPU.
 
 2. Set up conda environment. Run 
     ```
-    source install.sh
+    source install_conda.sh
+    ```
+
+   Alternatively, you can also create a virtualenv environment:
+    ```
+    source install_pip.sh
     ```
 
     <details>
