@@ -186,7 +186,7 @@ def checkerboard_geometry(
                 cur_verts = np.stack([us, vs, zs], axis=-1)  # (4, 3)
 
             cur_faces = np.array(
-                [[0, 1, 3], [1, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int
+                [[0, 1, 3], [1, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int64
             )
             cur_faces += 4 * (i * num_cols + j)  # the number of previously added verts
             use_color0 = (i % 2 == 0 and j % 2 == 0) or (i % 2 == 1 and j % 2 == 1)

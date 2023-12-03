@@ -1,8 +1,9 @@
 git+https://github.com/nghorbani/configer
+git+https://github.com/mattloper/chumpy
 setuptools==59.5.0
 torchgeometry==0.1.2
 tensorboard
-numpy==1.23
+numpy
 smplx
 pyrender
 open3d
@@ -16,7 +17,6 @@ cython
 tqdm
 hydra-core
 pyyaml
-chumpy
 gdown
 dill
 motmetrics

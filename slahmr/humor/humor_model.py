@@ -663,13 +663,13 @@ class HumorModel(nn.Module):
                 gender_names = ["male", "female", "neutral"]
                 pred_joints = []
                 prev_nbidx = 0
-                cat_idx_map = np.ones((B), dtype=np.int) * -1
+                cat_idx_map = np.ones((B), dtype=np.int32) * -1
                 for gender_name in gender_names:
                     gender_idx = np.array(gender) == gender_name
                     nbidx = np.sum(gender_idx)
 
                     cat_idx_map[gender_idx] = np.arange(
-                        prev_nbidx, prev_nbidx + nbidx, dtype=np.int
+                        prev_nbidx, prev_nbidx + nbidx, dtype=np.int32
                     )
                     prev_nbidx += nbidx
 
@@ -1209,12 +1209,12 @@ class HumorModel(nn.Module):
                 gender_names = ["male", "female", "neutral"]
                 pred_joints = []
                 prev_nbidx = 0
-                cat_idx_map = np.ones((B), dtype=np.int) * -1
+                cat_idx_map = np.ones((B), dtype=np.int32) * -1
                 for gender_name in gender_names:
                     gender_idx = np.array(gender) == gender_name
                     nbidx = np.sum(gender_idx)
                     cat_idx_map[gender_idx] = np.arange(
-                        prev_nbidx, prev_nbidx + nbidx, dtype=np.int
+                        prev_nbidx, prev_nbidx + nbidx, dtype=np.int32
                     )
                     prev_nbidx += nbidx
 
