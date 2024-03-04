@@ -201,5 +201,5 @@ if __name__ == "__main__":
         for seq in args.seqs[:1]:
             subseqs, idcs = split_sequence(args, seq)
             for idcs, (start, end) in zip(idcs, subseqs):
-                cmd = get_slam_command(args, seq, start, end)
+                cmd = get_slam_command(args, seq, start=start, end=end)
                 ex.submit(launch_job, args.gpus, cmd)
